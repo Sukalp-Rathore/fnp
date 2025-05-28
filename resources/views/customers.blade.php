@@ -1,0 +1,280 @@
+@extends('layout')
+@section('content')
+
+<!-- jQuery Confirm CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.min.css">
+
+<div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+    <div>
+        <h1 class="page-title fw-medium fs-18 mb-0">All Customers</h1>
+    </div>
+</div> 
+
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card custom-card">
+            <div class="card-header justify-content-between">
+                <div class="card-title">Primary and Secondary Customers</div>
+                <div class="card-options">
+                    <a class="btn btn-primary btn-sm add-customer">Add Customer</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="file-exports" class="table table-bordered text-nowrap w-100">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Mobile No.</th>
+                                <th>Address</th>
+                                <th>Event</th>
+                                <th>Type</th>
+                                <th>Created At</th>
+                                <th>Options</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($customers as $c)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $c->customer_name }}</td>
+                                    <td>{{ $c->customer_email }}</td>
+                                    <td>{{ $c->customer_phone }}</td>
+                                    <td>{{ $c->customer_address }}</td>
+                                    <td>{{ $c->event_name }}</td>
+                                    <td>{{ ucfirst($c->customer_type) }}</td>
+                                    <td>{{ $c->created_at ?? '' }}</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm editBtn" data-id="{{$c->_id}}">Edit</button>
+                                        <button class="btn btn-danger btn-sm deleteBtn" data-id="{{$c->_id}}">Delete</button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modals for add vendor  --}}
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="exampleModalLgLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title" id="exampleModalLgLabel">Add Customer</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="response">
+                <form id="addCustomerForm" method="POST" action="{{route('customer.create')}}">
+                    {{-- CSRF Token --}}
+                    @csrf
+                    <div class="mb-3">
+                        <label for="customer_name" class="form-label">Customer Name</label>
+                        <input type="text" class="form-control" id="customer_name" name="customer_name" placeholder="Enter full customer name" required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label for="customer_email" class="form-label">Customer Email</label>
+                        <input type="email" class="form-control" id="customer_email" name="customer_email" placeholder="Enter customer email" autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label for="customer_phone" class="form-label">Mobile No.</label>
+                        <input type="tel" maxlength="10" class="form-control" id="customer_phone" placeholder="Enter 10 digit customer phone number" name="customer_phone" autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label for="customer_address" class="form-label">Customer address</label>
+                        <input type="text" class="form-control" id="customer_address" placeholder="Enter customer address" name="customer_address" autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label for="customer_type" class="form-label">Customer Type</label>
+                        <select class="form-select" id="customer_type" name="customer_type">
+                            <option value="Primary">Primary</option>
+                            <option value="Secondary">Secondary</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="event_name" class="form-label">Choose event</label>
+                        <select class="form-select" id="event_name" name="event_name">
+                            @foreach ($events as $event)
+                                <option value="{{ $event }}">{{ $event }}</option>
+                            @endforeach
+                            <option value="">None</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-secondary" type="submit">Add Customer</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{-- Modals for edit vendor  --}}
+<div class="modal fade" id="editCustomerModal" tabindex="-1" aria-labelledby="exampleModalLgLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title" id="exampleModalLgLabel">Update Customer</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="responsec">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{-- modal end --}}
+
+@endsection
+
+
+@section('js')
+
+<!-- jQuery Confirm JS -->
+<script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/js/jquery-confirm.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    var table = $('#file-exports').DataTable({
+        dom: 'Bfrtip',
+        buttons: [{
+            extend: 'collection',
+            text: '<i class="fa fa-download"></i> Export',
+            buttons: [{
+                    extend: 'copy',
+                    text: '<i class="fa fa-copy"></i> Copy'
+                },
+                {
+                    extend: 'csv',
+                    text: '<i class="fa fa-file-csv"></i> CSV'
+                },
+                {
+                    extend: 'excel',
+                    text: '<i class="fa fa-file-excel"></i> Excel'
+                },
+                {
+                    extend: 'pdf',
+                    text: '<i class="fa fa-file-pdf"></i> PDF'
+                }
+            ]
+        }],
+        language: {
+            searchPlaceholder: 'Search...',
+            sSearch: '',
+        }
+    });
+
+    $(document).on('click', '.add-customer', function() {
+        $("#addCustomerModal").modal('show');
+    });
+
+    $('#addCustomerForm').on('submit', function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+        $.ajax({
+            type: 'POST',
+            url: $(this).attr('action'),
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                $('#addCustomerModal').modal('hide');
+                window.location.reload();
+                toastr.success(response.message);
+            },
+            error: function(xhr, status, error) {
+                var response = xhr.responseJSON;
+                if (response && response.errors) {
+                    $.each(response.errors, function(key, value) {
+                        toastr.error(value[0]);
+                    });
+                }
+            }
+        });
+    });
+
+    $(document).on('click', '.editBtn', function() {
+        let vendorId = $(this).attr('data-id');
+        $("#editCustomerModal").modal('show');
+        $.ajax({
+            url: "{{ route('customer.show.edit') }}",
+            type: 'POST',
+            data: {
+                customerId: customerId,
+            },
+            success: function(response) {
+                if (response.success == false) {
+                    alert(response.message);
+                } else {
+                    $("#responsec").html(response);
+                };
+            },
+            error: function(xhr, status, error) {
+                // Handle error response
+                console.error(xhr.responseText);
+            }
+        }); 
+    });
+
+    $(document).on('click', '.deleteBtn', function() {
+        let vendorId = $(this).attr('data-id');
+
+        $.confirm({
+            title: 'Confirm Deletion',
+            content: 'Are you sure you want to delete this customer?',
+            buttons: {
+                confirm: {
+                    text: 'Yes, Delete',
+                    btnClass: 'btn-red',
+                    action: function () {
+                        $.ajax({
+                            url: "{{ route('customer.delete') }}",
+                            type: 'POST',
+                            data: {
+                                vendorId: vendorId,
+                                _token: '{{ csrf_token() }}' // add CSRF token manually if needed
+                            },
+                            success: function(response) {
+                                if (response.success == false) {
+                                    $.alert({
+                                        title: 'Error',
+                                        content: response.message,
+                                        type: 'red'
+                                    });
+                                } else {
+                                    toastr.success(response.message);
+                                    setTimeout(function () {
+                                        window.location.reload();
+                                    }, 1000);
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error(xhr.responseText);
+                                $.alert({
+                                    title: 'Ajax Error',
+                                    content: 'Something went wrong while deleting.',
+                                    type: 'red'
+                                });
+                            }
+                        });
+                    }
+                },
+                cancel: function () {
+                    // Do nothing on cancel
+                }
+            }
+        });
+    });
+
+});
+</script>
+
+@endsection
