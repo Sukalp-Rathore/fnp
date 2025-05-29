@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Customer;
+use Illuminate\Support\Facades\DB;
 
 class DataController extends Controller
 {
@@ -75,5 +76,34 @@ class DataController extends Controller
             'status' => 'success',
             'message' => "$upadated customers updated successfully"
         ]);
+    }
+
+    public function importData(Request $request)
+    {
+        // Fetch all records from the 'test' collection directly using MongoDB
+        $testRecords = DB::connection('mongodb')->table('test')->get();
+
+        foreach ($testRecords as $record) {
+            // Convert role
+            $customer_type = 'secondary';
+
+            // Build and save new customer
+            Customer::create([
+                'customer_type'     => $customer_type,
+                'customer_name'     => $record->customer_name,
+                'vendor_email'    => $record->to_email ?? null,
+                'customer_address'  => $record->address ?? null,
+                'customer_phone'    => $record->mobile ?? null,
+                'event_name' => $record->events ?? null,
+                'product' => $record->product ?? null,
+                'product_value' => $record->product_value ?? null,
+                'message' => $record->message ?? null,
+                'forward_date' => $record->forward_date ?? null,
+                'created_by' => 'forward event order cpanel',
+                'created_at' => now(),
+            ]);
+        }
+
+        return response()->json(['message' => 'Customers imported successfully.']);
     }
 }

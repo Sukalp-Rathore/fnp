@@ -60,4 +60,5 @@ Route::middleware(['web' ,'auth'])->group(function () {
     // data routes 
     Route::post('add-customer-test',[DataController::class, 'addCustomer'])->name('add.customer');
     Route::get('customer-change-type',[DataController::class, 'customerType'])->name('customer.change.type');
+    Route::get('import-data', [DataController::class, 'importData'])->name('import.data');
 });

@@ -17,6 +17,11 @@ class Customer extends Model
         'sender_name',
         'customer_phone',
         'customer_type',
+        'vendor_email',
+        'product',
+        'product_value',
+        'message',
+        'forward_date',
         'created_by',
     ];
 }
