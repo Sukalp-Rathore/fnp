@@ -16,5 +16,7 @@ class Inventory extends Model
         'selling_price',
         'product_image',
         'quantity',
+        'total_stock_amount',
+        'color',
     ];
 }

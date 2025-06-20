@@ -12,7 +12,12 @@ class InventoryController extends Controller
     public function inventory()
     {
         $products = Inventory::get();
-        return view('inventory' ,compact('products'));
+        $totalStockAmount = 0;
+        foreach($products as $product){
+            $price = $product->total_stock_amount;
+            $totalStockAmount += $price;
+        }
+        return view('inventory' ,compact('products','totalStockAmount'));
     }
 
     public function createInventory(Request $request)
@@ -20,7 +25,6 @@ class InventoryController extends Controller
         $validator = Validator::make($request->all(), [
             'product_name' => 'required|string|max:255',
             'type' => 'required|string',
-            'cost_price' => 'nullable|numeric',
             'selling_price' => 'nullable|numeric',
             'product_image' => 'nullable|image|max:2048', // max 2MB
         ]);
@@ -43,8 +47,8 @@ class InventoryController extends Controller
         $product = new Inventory();
         $product->product_name = $request->product_name;
         $product->type = $request->type;
-        $product->cost_price = $request->cost_price;
-        $product->selling_price = $request->selling_price;
+        $product->selling_price = (int)$request->selling_price;
+        $product->total_stock_amount = 0 ; // Assuming total stock price is cost price * 100
         $product->product_image = $base64Image; // base64 image stored in MongoDB
         $product->save();
 
@@ -93,7 +97,6 @@ class InventoryController extends Controller
             'product_id' => 'required|string',
             'product_name' => 'required|string|max:255',
             'type' => 'required|string',
-            'cost_price' => 'required|numeric',
             'selling_price' => 'required|numeric',
             'product_image' => 'nullable|image|max:2048', // Max 2MB
         ]);
@@ -107,8 +110,8 @@ class InventoryController extends Controller
         // Update product details
         $product->product_name = $request->product_name;
         $product->type = $request->type;
-        $product->cost_price = $request->cost_price;
-        $product->selling_price = $request->selling_price;
+        $product->selling_price = (int)$request->selling_price;
+        $product->total_stock_amount = (int)$product->selling_price * $product->quantity; // Update total stock amount
 
         // Handle image upload
         if ($request->hasFile('product_image')) {
@@ -152,7 +155,8 @@ class InventoryController extends Controller
         foreach ($request->stock as $item) {
             $product = Inventory::where('_id', $item['id'])->first();
             if ($product) {
-                $product->quantity = (int)$item['quantity'];
+                $product->quantity = $product->quantity + (int)$item['quantity'];
+                $product->total_stock_amount = (int)$product->selling_price * $product->quantity; // Update total stock amount
                 $product->save();
             }
         }

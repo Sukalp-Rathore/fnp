@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Vendor;
+use App\Models\Order;
 
 class VendorController extends Controller
 {
@@ -12,6 +13,34 @@ class VendorController extends Controller
     {
         $vendors = Vendor::get();
         return view('vendors' , compact('vendors'));
+    }
+
+    public function getVendorOrders(Request $request)
+    {
+        $request->validate([
+            'vendor_id' => 'required|string',
+        ]);
+
+        $vendorId = $request->vendor_id;
+
+        // Get the current month and year
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+
+        // Fetch orders for the vendor in the current month
+        $orders = Order::where('vendor', $vendorId)
+            ->whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear)
+            ->get();
+
+        // Calculate the total order amount
+        $totalAmount = $orders->sum('order_price');
+
+        return response()->json([
+            'success' => true,
+            'orders' => $orders,
+            'totalAmount' => $totalAmount,
+        ]);
     }
 
     public function createVendor(Request $request)

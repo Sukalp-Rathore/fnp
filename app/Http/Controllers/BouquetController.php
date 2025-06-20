@@ -12,7 +12,7 @@ class BouquetController extends Controller
     //
     public function bouquet()
     {
-        $bouquets = Bouquet::get();
+        $bouquets = Bouquet::orderBy('created_at', 'desc')->get();
         return view('bouquet' , compact('bouquets'));
     }
 
@@ -175,6 +175,36 @@ class BouquetController extends Controller
         $bouquet->save();
     
         return response()->json(['success' => true, 'message' => 'Bouquet updated successfully']);
+    }
+
+    public function getBouquetReceipt(Request $request)
+    {
+        $request->validate([
+            'bouquet_id' => 'required|string',
+        ]);
+    
+        $bouquet = Bouquet::where("_id", $request->bouquet_id)->first();
+    
+        if (!$bouquet) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bouquet not found.',
+            ]);
+        }
+    
+        // Fetch items from the bouquet
+        $items = collect($bouquet->items)->map(function ($item) {
+            return [
+                'item_name' => $item['item_name'],
+                'quantity' => $item['quantity'],
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'items' => $items,
+            'total_price' => $bouquet->total_price, // Use the total price stored in the bouquet
+        ]);
     }
 
 }

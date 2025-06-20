@@ -161,11 +161,14 @@
             <div class="authentication-cover overflow-hidden">
                 <div class="aunthentication-cover-content d-flex align-items-center justify-content-center">
                     <div>
-                        <h1 class="text-fixed-white mb-1 fw-medium" style="font-size:2.3rem">Welcome To Flowers and Petals!
+                        <h1 class="text-fixed-white mb-1 fw-medium" style="font-size:2.3rem">Welcome To Flowers and
+                            Petals!
                         </h1>
                         <h6 class="text-fixed-white mb-3">Flowers and Petals management system.</h6>
-                        <p class="text-fixed-white mb-1 op-6">A seamless order processing and inventory tracking solution,
-                            featuring bouquet creation management and digital receipt generation to support optimized supply
+                        <p class="text-fixed-white mb-1 op-6">A seamless order processing and inventory tracking
+                            solution,
+                            featuring bouquet creation management and digital receipt generation to support optimized
+                            supply
                             workflows.</p>
                     </div>
                 </div>
@@ -199,8 +202,8 @@
                 url: form.attr('action'),
                 data: form.serialize(),
                 success: function(response) {
-                     if (response.success) {
-                        toastr.success(response.success);
+                    if (response.success) {
+                        toastr.success(response.message);
                         window.location.href = "{{ route('dashboard') }}";
                     }
                 },

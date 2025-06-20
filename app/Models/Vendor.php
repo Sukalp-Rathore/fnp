@@ -14,6 +14,7 @@ class Vendor extends Model
         'first_name',
         'email',
         'mobile',
+        'alternate_mobile',
         'city',
         'gender'
     ];

@@ -153,16 +153,12 @@
                     <div class="header-element">
                         <div class="horizontal-logo">
                             <a href="index.html" class="header-logo">
-                                <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo"
-                                    class="desktop-logo">
+                                <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo" class="desktop-logo">
                                 <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo" class="toggle-dark">
-                                <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo"
-                                    class="desktop-dark">
+                                <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo" class="desktop-dark">
                                 <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo" class="toggle-logo">
-                                <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo"
-                                    class="toggle-white">
-                                <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo"
-                                    class="desktop-white">
+                                <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo" class="toggle-white">
+                                <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo" class="desktop-white">
                             </a>
                         </div>
                     </div>
@@ -287,6 +283,27 @@
                                 class="side-menu__item  {{ url()->current() == route('all-orders') ? 'active' : '' }}">
                                 <i class="bi bi-box-seam w-7 h-7 side-menu__icon"></i>
                                 <span class="side-menu__label">Order Management</span>
+                            </a>
+                        </li>
+                        <li class="slide">
+                            <a href="{{ route('sales') }}"
+                                class="side-menu__item  {{ url()->current() == route('sales') ? 'active' : '' }}">
+                                <i class="bi bi-cash-coin w-7 h-7 side-menu__icon"></i>
+                                <span class="side-menu__label">Sales Management</span>
+                            </a>
+                        </li>
+                        <li class="slide">
+                            <a href="{{ route('purchase') }}"
+                                class="side-menu__item  {{ url()->current() == route('purchase') ? 'active' : '' }}">
+                                <i class="bi bi-cash-stack w-7 h-7 side-menu__icon"></i>
+                                <span class="side-menu__label">Purchase Management</span>
+                            </a>
+                        </li>
+                        <li class="slide">
+                            <a href="{{ route('event') }}"
+                                class="side-menu__item  {{ url()->current() == route('event') ? 'active' : '' }}">
+                                <i class="bi bi-emoji-smile w-7 h-7 side-menu__icon"></i>
+                                <span class="side-menu__label">Event Management</span>
                             </a>
                         </li>
                     </ul>

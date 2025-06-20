@@ -23,5 +23,6 @@ class Customer extends Model
         'message',
         'forward_date',
         'created_by',
+        'event_date',
     ];
 }
