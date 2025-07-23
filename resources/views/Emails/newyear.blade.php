@@ -3,7 +3,7 @@
 
 <head>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-    <title>Christmas Is Coming</title>
+    <title>New Year Is Coming</title>
     <meta name="description" content="Rakhi Is Coming.">
     <style type="text/css">
         a:hover {
@@ -37,30 +37,28 @@
                                     <td style="padding:0 35px;">
                                         <h1
                                             style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">
-                                            Make Their Christmas Merrier – Pre-Book Your Festive Gifts 🎅✨</h1>
+                                            Start the New Year with Blooming Joy – Pre-Book Your Gifts 🌸</h1>
                                         <span
                                             style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
                                         <p
                                             style="color:#455056; font-size:15px;line-height:24px; margin:0;text-align:left;">
-                                            Dear {{ $details['customer_name'] }}, <br>
+                                            Dear {{ $details['customer_name'] }},<br>
                                             <br>
-                                            Christmas is a season of giving, joy, and heartfelt connections. Whether
-                                            it’s flowers to brighten their home or gifts to warm their heart, Flowers n
-                                            Petals is here to help you spread cheer.
+                                            As 2025 ends and we step into 2026, it’s the perfect time to express love,
+                                            appreciation, and best wishes to those who matter.
                                             <br><br>
-                                            This Christmas, choose from:
+                                            Welcome the new year with:
                                             <br><br>
-                                            🎄 Festive floral arrangements <br>
-                                            🎁 Handcrafted gift hampers <br>
-                                            🍫 Chocolates, cookies & holiday treats <br>
-                                            🎅 Santa-themed combos & décor <br>
-                                            <br>
-                                            ✨ Make your presence felt—even from afar—with timely, joyful deliveries.
+                                            🎉 Cheerful flower arrangements <br>
+                                            🎁 Elegant New Year gift hampers <br>
+                                            🍫 Celebration packs with sweets, chocolates, and bubbly add-ons <br>
+                                            🎊 Personalized gifting options for a memorable start <br>
                                             <br><br>
-                                            Pre-book your Christmas surprises now and let your loved ones unwrap a
-                                            bundle of smiles.
+                                            Let your gifts be the first smile your loved ones receive in 2026!
                                             <br><br>
-                                            Wishing you love, light, and peace this season,<br>
+                                            📦 Pre-book now to ensure timely, smooth delivery on 31st Dec & 1st Jan.
+                                            <br><br>
+                                            Sending joy, color, and celebration your way,<br>
                                             Team Flowers n Petals <br>
                                             📞 9893056096 | 📍 Indore <br>
                                             📲 WhatsApp us for orders | flowersnpetals.net

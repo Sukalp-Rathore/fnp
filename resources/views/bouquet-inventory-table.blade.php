@@ -7,6 +7,7 @@
         <tr>
             <th>S.No</th>
             <th>Product Name</th>
+            <th>Color</th>
             <th>Type</th>
             <th>Selling Price</th>
             <th>Quantity</th>
@@ -23,6 +24,7 @@
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $item->product_name }}</td>
+                <td>{{ $item->color }}</td>
                 <td>{{ $item->type }}</td>
                 <td>{{ $item->selling_price }}</td>
                 <td>{{ $item->quantity }}</td>

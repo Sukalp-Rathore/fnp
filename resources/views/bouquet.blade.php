@@ -23,6 +23,7 @@
                                     <th>S.No</th>
                                     <th>Customer Name</th>
                                     <th>Bouquet Price</th>
+                                    <th>Created By</th>
                                     <th>Created At</th>
                                     <th>Delivery Date</th>
                                     <th>Delivery Address</th>
@@ -35,8 +36,9 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $b->customer_name }}</td>
                                         <td>{{ $b->total_price }}</td>
-                                        <td>{{ $b->created_at }}</td>
-                                        <td>{{ $b->delivery_date }}</td>
+                                        <td>{{ $b->created_by ?? 'N/A' }}</td>
+                                        <td>{{ getutc($b->created_at, 'd.m.Y') }}</td>
+                                        <td>{{ getutc($b->delivery_date, 'd.m.Y') }}</td>
                                         <td>{{ $b->delivery_address ?? '' }}</td>
                                         <td>
                                             <button class="btn btn-primary btn-sm infoBtn"
@@ -66,6 +68,13 @@
                 <div class="modal-body">
                     <div id="inventoryTableContainer">
                         <!-- Inventory table will be loaded here dynamically -->
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-header">Created By</div>
+                        <div class="card-body">
+                            <input type="text" class="form-control mb-2" name="created_by"
+                                placeholder="Person Name (Who created this bouquet)" autocomplete="off">
+                        </div>
                     </div>
                     <div class="card mt-3">
                         <div class="card-header">Customer Details (Optional)</div>
@@ -116,6 +125,7 @@
                         <thead>
                             <tr>
                                 <th>Item Name</th>
+                                <th>Color</th>
                                 <th>Quantity</th>
                             </tr>
                         </thead>
@@ -135,7 +145,7 @@
         </div>
     </div>
     {{-- Modal to Edit Bouquet --}}
-    <div class="modal fade" id="editBouquetModal" data-id="{{ $b->_id }}" tabindex="-1"
+    <div class="modal fade" id="editBouquetModal" data-id="{{ $b->_id ?? '' }}" tabindex="-1"
         aria-labelledby="editBouquetModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content" id="editBouquetModalContent">
@@ -158,6 +168,7 @@
                         <thead>
                             <tr>
                                 <th>Item Name</th>
+                                <th>Color</th>
                                 <th>Quantity</th>
                             </tr>
                         </thead>
@@ -229,8 +240,7 @@
             $(document).on('click', '#createBouquetBtn', function() {
                 const deliveryDate = $('input[name="delivery_date"]').val();
                 const today = new Date().toISOString().split('T')[
-                    0]; // Get today's date in YYYY-MM-DD format
-
+                0]; // Get today's date in YYYY-MM-DD format
                 // Check if the delivery date is valid
                 if (deliveryDate && deliveryDate < today) {
                     toastr.error('Delivery date must be today or a future date.');
@@ -244,6 +254,7 @@
                 formData.append('customer_phone', $('input[name="customer_phone"]').val());
                 formData.append('delivery_date', $('input[name="delivery_date"]').val());
                 formData.append('delivery_address', $('textarea[name="delivery_address"]').val());
+                formData.append('created_by', $('input[name="created_by"]').val());
 
                 // Collect items as an array
                 $('#inventoryTableContainer').find('tr').each(function(index) {
@@ -310,6 +321,7 @@
                                 itemsHtml += `
                             <tr>
                                 <td>${item.item_name}</td>
+                                <td>${item.color}</td>
                                 <td>${item.quantity}</td>
                             </tr>
                         `;
@@ -425,6 +437,7 @@
                                 itemsHtml += `
                                     <tr>
                                         <td>${item.item_name}</td>
+                                        <td>${item.color}</td>
                                         <td>${item.quantity}</td>
                                     </tr>
                                 `;

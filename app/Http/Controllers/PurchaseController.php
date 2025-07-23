@@ -19,21 +19,41 @@ class PurchaseController extends Controller
     public function enterPurchase(Request $request)
     {
         $request->validate([
-            'purchase_person' => 'required',
-            'amount' => 'required',
-            'payment_mode' => 'required',
+            'purchase_person' => 'required|string',
+            'amount' => 'required|numeric',
+            'payment_mode' => 'required|string',
+            'paid_amount' => 'required|numeric',
         ]);
-        $purchase_person = $request->purchase_person;
-        $amount = (int)$request->amount;
-        $payment_mode = $request->payment_mode;
-
+    
+        $purchasePerson = $request->purchase_person;
+        $amount = (float) $request->amount;
+        $paid = (float) $request->paid_amount;
+        $status = 'pending';
+    
+        if ($paid >= $amount) {
+            $status = 'paid';
+        } elseif ($paid > 0 && $paid < $amount) {
+            $status = 'part-payment';
+        }
+    
+        // Save the purchase
         Purchase::create([
-            'purchase_person' => $purchase_person,
+            'purchase_person' => $purchasePerson,
             'amount' => $amount,
-            'payment_mode' => $payment_mode
+            'payment_mode' => $request->payment_mode,
+            'paid_amount' => $paid,
+            'payment_status' => $status
         ]);
-        
-        return response()->json(['success' => true, 'message' => 'Entry Successfull']);
+    
+        // Update vendor summary
+        $vendor = PurchaseVendor::where('name', $purchasePerson)->first();
+        if ($vendor) {
+            $vendor->total_purchase += $amount;
+            $vendor->amount_pending += ($amount - $paid);
+            $vendor->save();
+        }
+    
+        return response()->json(['success' => true, 'message' => 'Entry Successful']);
     }
 
     public function index()

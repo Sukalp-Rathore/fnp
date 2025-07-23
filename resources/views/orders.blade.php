@@ -45,7 +45,7 @@
                                 @foreach ($orders as $o)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $o->created_at }}</td>
+                                        <td>{{ getutc($o->created_at, 'd.m.Y') }}</td>
                                         <td>{{ $o->created_by }}</td>
                                         <td>{{ $o->customer_name_primary }}</td>
                                         <td>{{ $o->customer_name_secondary }}</td>
@@ -58,7 +58,7 @@
                                         <td>{{ $o->event_name }}</td>
                                         <td>{{ $o->products }}</td>
                                         <td>{{ $o->vendor }}</td>
-                                        <td>{{ $o->delivery_date }}</td>
+                                        <td>{{ getutc($o->delivery_date, 'd.m.Y') }}</td>
                                         <td>
                                             @if ($o->order_status == 'pending')
                                                 <span class="badge bg-warning">Pending</span>
@@ -71,7 +71,7 @@
                                                 <button class="btn btn-success markDelivered"
                                                     data-id="{{ $o->_id }}">Mark Delivered</button>
                                             @endif
-                                            <button class="btn btn-secondary editBtn">Edit</button>
+                                            {{-- <button class="btn btn-secondary editBtn">Edit</button> --}}
                                         </td>
                                     </tr>
                                 @endforeach
@@ -140,6 +140,11 @@
                                 </select>
                             </div>
                             <div class="mb-3">
+                                <label for="event_date" class="form-label">Event Date</label>
+                                <input type="date" class="form-control" id="event_date" name="event_date" required
+                                    autocomplete="off">
+                            </div>
+                            <div class="mb-3">
                                 <label for="deliveryDate" class="form-label">Delivery Date</label>
                                 <input type="date" class="form-control" id="deliveryDate" name="delivery_date"
                                     required autocomplete="off">
@@ -184,9 +189,9 @@
                                     name="customer_mobile_secondary" autocomplete="off">
                             </div>
                             <div class="mb-3">
-                                <label for="customerAddressSecondary" class="form-label">Customer Address</label>
+                                <label for="customer_address_secondary" class="form-label">Customer Address</label>
                                 <textarea class="form-control" id="customerAddressSecondary" name="customer_address_secondary" rows="2"
-                                    required autocomplete="off"></textarea>
+                                    autocomplete="off"></textarea>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Create Order</button>
@@ -265,7 +270,7 @@
                                 // Populate the dropdown with the fetched vendors
                                 vendors.forEach(function(vendor) {
                                     vendorDropdown.append(
-                                        `<option value="${vendor.id}">${vendor.first_name}</option>`
+                                        `<option value="${vendor._id}">${vendor.first_name}</option>`
                                     );
                                 });
                             }

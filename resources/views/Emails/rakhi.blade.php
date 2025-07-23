@@ -3,7 +3,7 @@
 
 <head>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-    <title>Christmas Is Coming</title>
+    <title>Rakhi Is Coming</title>
     <meta name="description" content="Rakhi Is Coming.">
     <style type="text/css">
         a:hover {
@@ -37,33 +37,38 @@
                                     <td style="padding:0 35px;">
                                         <h1
                                             style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">
-                                            Make Their Christmas Merrier – Pre-Book Your Festive Gifts 🎅✨</h1>
+                                            Celebrate the Bond of Love this Rakhi – Pre-Book Now 🌼</h1>
                                         <span
                                             style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
                                         <p
                                             style="color:#455056; font-size:15px;line-height:24px; margin:0;text-align:left;">
-                                            Dear {{ $details['customer_name'] }}, <br>
+                                            Dear {{ $details['customer_name'] }},<br>
                                             <br>
-                                            Christmas is a season of giving, joy, and heartfelt connections. Whether
-                                            it’s flowers to brighten their home or gifts to warm their heart, Flowers n
-                                            Petals is here to help you spread cheer.
-                                            <br><br>
-                                            This Christmas, choose from:
-                                            <br><br>
-                                            🎄 Festive floral arrangements <br>
-                                            🎁 Handcrafted gift hampers <br>
-                                            🍫 Chocolates, cookies & holiday treats <br>
-                                            🎅 Santa-themed combos & décor <br>
+                                            Raksha Bandhan is not just a festival—it's a celebration of the beautiful
+                                            bond between siblings, filled with memories, laughter, and love.
                                             <br>
-                                            ✨ Make your presence felt—even from afar—with timely, joyful deliveries.
+                                            <br>
+                                            This year, make your Rakhi celebrations truly unforgettable with our
+                                            specially curated collection of:
                                             <br><br>
-                                            Pre-book your Christmas surprises now and let your loved ones unwrap a
-                                            bundle of smiles.
+                                            🎁 Beautiful Rakhi hampers
+                                            💐 Fresh & fragrant flower arrangements
+                                            🍫 Sweets, chocolates, and personalized gifts
+                                            🚚 Timely doorstep delivery with care
                                             <br><br>
-                                            Wishing you love, light, and peace this season,<br>
+                                            Whether you're near or far, let your sibling know you're thinking of them
+                                            with something special from Flowers n Petals.
+                                            <br>
+                                            🕐 Avoid last-minute rush—Pre-book your Rakhi orders today! <br>
+                                            📲 Just reply to this email or reach us on WhatsApp to place your order.
+                                            <br>
+                                            <br><br>
+                                            Let’s help you send love, wrapped in fragrance and festivity.
+                                            <br>
+                                            Warm wishes,<br>
                                             Team Flowers n Petals <br>
                                             📞 9893056096 | 📍 Indore <br>
-                                            📲 WhatsApp us for orders | flowersnpetals.net
+                                            🌐 flowersnpetals.net
                                         </p>
                                     </td>
                                 </tr>

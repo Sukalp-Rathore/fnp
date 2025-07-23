@@ -29,6 +29,7 @@
                                     <th>Mobile No.</th>
                                     <th>Address</th>
                                     <th>Event</th>
+                                    <th>Event Date</th>
                                     <th>Type</th>
                                     <th>Created At</th>
                                     <th>Options</th>
@@ -93,6 +94,11 @@
                                 @endforeach
                                 <option value="">None</option>
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="event_date">Event Date</label>
+                            <input type="date" class="form-control" id="event_date" name="event_date"
+                                placeholder="Select event date" autocomplete="off">
                         </div>
                         <div class="mb-3">
                             <button class="btn btn-secondary" type="submit">Add Customer</button>
@@ -182,12 +188,19 @@
                         }
                     }, // Address
                     {
-                        data: 'customer_event',
-                        name: 'customer_event',
+                        data: 'event_name',
+                        name: 'event_name',
                         render: function(data) {
                             return data ? data : 'N/A'; // Handle null values
                         }
                     }, // Event
+                    {
+                        data: 'event_date',
+                        name: 'event_date',
+                        render: function(data) {
+                            return data ? data : 'N/A'; // Handle null values
+                        }
+                    }, // Event Date
                     {
                         data: 'customer_type',
                         name: 'customer_type',
@@ -298,7 +311,7 @@
             });
 
             $(document).on('click', '.deleteBtn', function() {
-                let vendorId = $(this).attr('data-id');
+                let customerId = $(this).attr('data-id');
 
                 $.confirm({
                     title: 'Confirm Deletion',
@@ -312,7 +325,7 @@
                                     url: "{{ route('customer.delete') }}",
                                     type: 'POST',
                                     data: {
-                                        vendorId: vendorId,
+                                        customerId: customerId,
                                         _token: '{{ csrf_token() }}' // add CSRF token manually if needed
                                     },
                                     success: function(response) {

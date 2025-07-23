@@ -35,7 +35,7 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $v->events }}</td>
-                                        <td>{{ $v->event_date }}</td>
+                                        <td>{{ getutc($v->event_date, 'd.m.Y') }}</td>
                                         <td class="text-center">
                                             <button class="btn btn-primary btn-sm editBtn"
                                                 data-id="{{ $v->_id }}">Edit</button>

@@ -82,4 +82,5 @@ Route::middleware(['web' ,'auth'])->group(function () {
     Route::get('import-data', [DataController::class, 'importData'])->name('import.data');
     Route::get('find-duplicate-customers', [DataController::class, 'findDuplicateCustomers'])->name('find.duplicate.customers');
     Route::get('delete-duplicate-customers', [DataController::class, 'deleteDuplicateCustomers'])->name('delete.duplicate.customers');
+    Route::get('update-dates',[DataController::class, 'updateDates'])->name('update.dates');
 });

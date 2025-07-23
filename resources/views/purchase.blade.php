@@ -27,18 +27,30 @@
                                     <th>S.No</th>
                                     <th>Person Name</th>
                                     <th>Amount</th>
+                                    <th>Amount Paid</th>
+                                    <th>Amount Pending</th>
                                     <th>Payment Mode</th>
+                                    <th>Payment Status</th>
                                     <th>Date</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($purchases as $v)
+                                    @php
+                                        $pending = $v->amount - $v->paid_amount;
+                                        if ($pending < 0) {
+                                            $pending = 0;
+                                        }
+                                    @endphp
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $v->purchase_person }}</td>
                                         <td>{{ $v->amount }}</td>
+                                        <td>{{ $v->paid_amount }}</td>
+                                        <td>{{ $pending }}</td>
                                         <td>{{ $v->payment_mode }}</td>
-                                        <td>{{ $v->created_at }}</td>
+                                        <td>{{ $v->payment_status }}</td>
+                                        <td>{{ getutc($v->created_at, 'd.m.Y') }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -84,7 +96,22 @@
                                     <option value="" disabled selected>Select Payment Method</option>
                                     <option value="online">Online</option>
                                     <option value="cash">Cash</option>
+                                    <option value="none">None</option>
                                 </select>
+                            </div>
+                            <div class="col-xl-12 form-group">
+                                <label for="payment_status" class="form-label text-default">Payment Status</label>
+                                <select class="sell form-control" name="payment_status" id="payment_status">
+                                    <option value="" disabled selected>Select Payment Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="part-payment">Part Payment</option>
+                                    <option value="paid">Paid</option>
+                                </select>
+                            </div>
+                            <div class="col-xl-12 form-group">
+                                <label for="paid_amount" class="form-label text-default">Amount Paid (Rs)</label>
+                                <input type="number" class="form-control" id="paid_amount" name="paid_amount"
+                                    placeholder="Enter Amount Paid" autocomplete="off" required>
                             </div>
                         </div>
                     </div>
@@ -113,6 +140,8 @@
                             <tr>
                                 <th>S.No</th>
                                 <th>Vendor Name</th>
+                                <th>Total Purchase</th>
+                                <th>Payment Pending</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -253,6 +282,8 @@
                                 <tr>
                                     <td>${index + 1}</td>
                                     <td>${vendor.name}</td>
+                                    <td>${vendor.total_purchase || 0}</td>
+                                    <td>${vendor.amount_pending || 0}</td>
                                     <td>
                                         <button class="btn btn-sm btn-warning editVendorBtn" data-id="${vendor.id}" data-name="${vendor.name}">Edit</button>
                                         <button class="btn btn-sm btn-danger deleteVendorBtn" data-id="${vendor.id}">Delete</button>

@@ -21,6 +21,7 @@ class Order extends Model
         "customer_address_secondary",
         "city",
         "event_name",
+        "event_date",
         "delivery_date",
         "order_status",
         "products",

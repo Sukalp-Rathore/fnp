@@ -34,7 +34,7 @@
                                         <td>{{ $v->cash_sale }}</td>
                                         <td>{{ $v->online_sale }}</td>
                                         <td>{{ $v->credit_sale }}</td>
-                                        <td>{{ $v->created_at ?? 'N/A' }}</td>
+                                        <td>{{ getutc($v->created_at, 'd.m.Y') ?? 'N/A' }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

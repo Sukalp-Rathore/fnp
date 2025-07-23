@@ -21,7 +21,7 @@ class EventController extends Controller
             'event_date' => 'required'
         ]);
         $events = $request->events;
-        $event_date = $request->event_date;
+        $event_date = setutc($request->event_date);
 
         FestivalEvent::create([
             'events' => $events,
@@ -52,7 +52,7 @@ class EventController extends Controller
         $event_id = $request->input('event_id');
         $event = FestivalEvent::where('_id', $event_id)->first();
         $event->events = $request->input('events');
-        $event->event_date = $request->input('event_date');
+        $event->event_date = setutc($request->input('event_date'));
         $event->save();
 
         return response()->json(['success' => true, 'message' => 'Event updated successfully']);

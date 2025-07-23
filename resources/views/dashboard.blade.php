@@ -115,7 +115,7 @@
                         Upcoming Events(This Month)
                     </div>
                 </div>
-                <div class="card-body p-0 pt-1">
+                <div class="card-body pt-1">
 
                     @if (sizeof($futureEventsInCurrentMonth) == 0)
                         <div class="alert alert-primary" role="alert">
@@ -139,7 +139,7 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="badge bg-primary">{{ $f->event_date }}</span>
+                                                <span class="badge bg-primary">{{ getutc($f->event_date, 'd.m.Y') }}</span>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -157,7 +157,7 @@
                         Top 5 Vendors
                     </div>
                 </div>
-                <div class="card-body p-0 pt-1">
+                <div class="card-body pt-1">
                     @if (sizeof($topVendors) == 0)
                         <div class="alert alert-primary2" role="alert">
                             No Orders With Vendors!
@@ -176,11 +176,11 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center gap-2">
-                                                    <div class="fw-medium">{{ $f->vendor }}</div>
+                                                    <div class="fw-medium">{{ $f['vendor'] }}</div>
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="badge bg-primary">{{ $f->total_revenue }}</span>
+                                                <span class="badge bg-primary">{{ $f['total_revenue'] }}</span>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -194,29 +194,31 @@
     </div>
 
     <div class="row">
-        <div class="col-xl-6">
+        <div class="col-xl-12">
             <div class="card custom-card overflow-hidden">
                 <div class="card-header justify-content-between">
                     <div class="card-title" style="font-size:0.85rem !important">
                         Customers who Orders Last Year For Upcoming Event
                     </div>
                     <div>
-                        <a href="javascript:void(0);" class="btn btn-secondary btn-sm">Send SMS</a>
-                        <a href="javascript:void(0);" class="btn btn-primary btn-sm">Whatsapp</a>
+                        <a href="javascript:void(0);" class="btn btn-secondary btn-sm" data-bs-toggle="modal"
+                            data-bs-target="#mailTemplateModal" class="send-mail">Send Mail</a>
+                        <a href="javascript:void(0);" class="btn btn-primary btn-sm send-whatsapp" data-bs-toggle="modal"
+                            data-bs-target="#whatsappTemplateModal">Whatsapp</a>
                     </div>
                 </div>
-                <div class="card-body p-0">
+                <div class="card-body">
                     @if (sizeof($customers) == 0)
                         <div class="alert alert-primary" role="alert">
                             No Customers Found!
                         </div>
                     @else
                         <div class="table-responsive">
-                            <table id="datatable-basic" class="table text-nowrap">
+                            <table id="datatable-basics" class="table text-nowrap">
                                 <thead>
                                     <tr>
                                         <th class="text-center">
-                                            <input class="form-check-input" type="checkbox" id="checkboxNoLabel1"
+                                            <input class="form-check-input" type="checkbox" id="select-all"
                                                 value="" aria-label="...">
                                         </th>
                                         <th>Customer Name</th>
@@ -231,7 +233,7 @@
                                         <tr>
                                             <td class="text-center">
                                                 <input class="form-check-input" type="checkbox" id="checkboxNoLabel02"
-                                                    value="" aria-label="..." checked>
+                                                    value="{{ $c->_id }}" aria-label="..." checked>
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center gap-3">
@@ -262,34 +264,38 @@
             </div>
         </div>
 
-        <div class="col-xl-6">
+        <div class="col-xl-12">
             <div class="card custom-card overflow-hidden">
                 <div class="card-header justify-content-between">
                     <div class="card-title" style="font-size:0.85rem !important">
                         Customers With Upcoming Event(15days)
                     </div>
                     <div>
-                        <a href="javascript:void(0);" class="btn btn-secondary btn-sm">Send SMS</a>
-                        <a href="javascript:void(0);" class="btn btn-primary btn-sm">Whatsapp</a>
+                        <a href="javascript:void(0);" class="btn btn-secondary btn-sm send-mail" data-bs-toggle="modal"
+                            data-bs-target="#mailTemplateModal">Send Mail</a>
+                        <a href="javascript:void(0);" class="btn btn-primary btn-sm send-whatsapp" data-bs-toggle="modal"
+                            data-bs-target="#whatsappTemplateModal">Whatsapp</a>
                     </div>
                 </div>
-                <div class="card-body p-0">
+                <div class="card-body">
                     @if (sizeof($customersUp) == 0)
                         <div class="alert alert-primary" role="alert">
                             No Customers Found!
                         </div>
                     @else
                         <div class="table-responsive">
-                            <table id="datatable-basic" class="table text-nowrap">
+                            <table id="datatable-basict" class="table text-nowrap">
                                 <thead>
                                     <tr>
                                         <th class="text-center">
-                                            <input class="form-check-input" type="checkbox" id="checkboxNoLabel1"
+                                            <input class="form-check-input" type="checkbox" id="select-all2"
                                                 value="" aria-label="...">
                                         </th>
                                         <th>Customer Name</th>
                                         <th>Customer Phone</th>
                                         <th>Customer Email</th>
+                                        <th>Event Date</th>
+                                        <th>Event Name</th>
                                         <th>Sender Name</th>
                                         <th>Customer Type</th>
                                     </tr>
@@ -298,8 +304,8 @@
                                     @foreach ($customersUp as $c)
                                         <tr>
                                             <td class="text-center">
-                                                <input class="form-check-input" type="checkbox" id="checkboxNoLabel02"
-                                                    value="" aria-label="..." checked>
+                                                <input class="form-check-input" type="checkbox" id="check2"
+                                                    value="{{ $c->_id }}" aria-label="...">
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center gap-3">
@@ -313,6 +319,13 @@
                                             </td>
                                             <td>
                                                 {{ $c->customer_email }}
+                                            </td>
+                                            <td>
+                                                <span
+                                                    class="badge bg-primary">{{ getutc($c->event_date, 'd.m.Y') }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ $c->event_name }}</span>
                                             </td>
                                             <td>
                                                 {{ $c->sender_name }}
@@ -331,82 +344,65 @@
         </div>
     </div>
 
-
-
-
-
-
-
-
-    {{-- 
-
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <form method="GET" action="{{ route('dashboard') }}">
-                <input type="hidden" name="filter_by_this_month" value="true">
-                <button type="submit" class="btn btn-primary">Show This Month</button>
-            </form>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- KPI Cards -->
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Total Sales</h5>
-                    <p class="card-text">{{ $totalSales }}</p>
+    <!-- Mail Template Selection Modal -->
+    <div class="modal fade" id="mailTemplateModal" tabindex="-1" aria-labelledby="mailTemplateModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mailTemplateModalLabel">Select Mail Template</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Total Purchase</h5>
-                    <p class="card-text">{{ $totalPurchase }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Total Bouquets</h5>
-                    <p class="card-text">{{ $totalBouquets }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Total Pending Orders</h5>
-                    <p class="card-text">{{ $totalPendingOrders }}</p>
+                <div class="modal-body">
+                    <form id="mailTemplateForm">
+                        <div class="mb-3">
+                            <label for="mailTemplate" class="form-label">Choose Template</label>
+                            <select class="form-select" id="mailTemplate" name="mail_template" required>
+                                <option value="" selected disabled>Choose A Occasion</option>
+                                <option value="diwali">Diwali</option>
+                                <option value="chistmas">Christmas</option>
+                                <option value="rakhi">Rakhi</option>
+                                <option value="newyear">New Year</option>
+                                <option value="birthday">Birthday</option>
+                                <option value="anniversary">Anniversary</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Emails</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Top Vendors by Revenue -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <h5>Top Vendors by Revenue</h5>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Vendor</th>
-                        <th>Total Revenue</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($topVendors as $vendor)
-                        <tr>
-                            <td>{{ $vendor->vendor }}</td>
-                            <td>{{ $vendor->total_revenue }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+    <!-- WhatsApp Template Selection Modal -->
+    <div class="modal fade" id="whatsappTemplateModal" tabindex="-1" aria-labelledby="whatsappTemplateModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="whatsappTemplateModalLabel">Select WhatsApp Template</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="whatsappTemplateForm">
+                        <div class="mb-3">
+                            <label for="whatsappTemplate" class="form-label">Choose Template</label>
+                            <select class="form-select" id="whatsappTemplate" name="whatsapp_template" required>
+                                <option value="" selected disabled>Choose A Occasion</option>
+                                <option value="diwali">Diwali</option>
+                                <option value="christmas">Christmas</option>
+                                <option value="rakhi">Rakhi</option>
+                                <option value="newyear">New Year</option>
+                                <option value="birthdays">Birthday</option>
+                                <option value="anniversary">Anniversary</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send WhatsApp Messages</button>
+                    </form>
+                </div>
+            </div>
         </div>
-    </div> --}}
+    </div>
 @endsection
 
 @section('js')
@@ -434,4 +430,154 @@
     <script src="assets/js/datatables.js"></script>
     <!-- Custom JS -->
     <script src="assets/js/custom.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", (event) => {
+            $('#datatable-basict').DataTable({
+                language: {
+                    searchPlaceholder: 'Search...',
+                    sSearch: '',
+                },
+                "pageLength": 10,
+                // scrollX: true
+            });
+            $('#datatable-basics').DataTable({
+                language: {
+                    searchPlaceholder: 'Search...',
+                    sSearch: '',
+                },
+                "pageLength": 10,
+                // scrollX: true
+            });
+
+            // Handle "Select All" checkbox
+            $('#select-all').on('click', function() {
+                var isChecked = $(this).is(':checked');
+                $('input.form-check-input').prop('checked', isChecked);
+            });
+
+            // Handle "Select All" checkbox
+            $('#select-all2').on('click', function() {
+                var isChecked = $(this).is(':checked');
+                $('input.form-check-input').prop('checked', isChecked);
+            });
+
+            // Ensure "Select All" checkbox updates when individual checkboxes are clicked
+            $('#datatable-basict tbody').on('change', 'input.form-check-input', function() {
+                if ($('input.form-check-input:checked').length === $('input.form-check-input').length) {
+                    $('#select-all').prop('checked', true);
+                } else {
+                    $('#select-all').prop('checked', false);
+                }
+            });
+
+            $('#datatable-basics tbody').on('change', 'input.form-check-input', function() {
+                if ($('input.form-check-input:checked').length === $('input.form-check-input').length) {
+                    $('#select-all').prop('checked', true);
+                } else {
+                    $('#select-all').prop('checked', false);
+                }
+            });
+
+            // Handle Send Mail button click
+            $('.send-mail').on('click', function() {
+                let selectedCustomers = [];
+                $('input.form-check-input:checked').each(function() {
+                    selectedCustomers.push($(this).val());
+                });
+
+                if (selectedCustomers.length === 0) {
+                    toastr.error('Please select at least one customer.');
+                    return;
+                }
+
+                // Populate the mail template modal with the selected customer data
+                $('#mailTemplateModal').modal('show');
+            });
+
+            // Handle mail template form submission
+            $('#mailTemplateForm').on('submit', function(e) {
+                e.preventDefault();
+                let selectedCustomers = [];
+                $('input.form-check-input:checked').each(function() {
+                    selectedCustomers.push($(this).val());
+                });
+                console.log(selectedCustomers, "ss");
+
+
+                let formData = $(this).serializeArray();
+                let template = formData.find(field => field.name === 'mail_template').value;
+
+                $.ajax({
+                    url: "{{ route('send.mail') }}",
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        customer_ids: selectedCustomers,
+                        mail_template: template
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                        $('#mailTemplateModal').modal('hide');
+                    },
+                    error: function(xhr) {
+                        toastr.error('An error occurred while sending emails.');
+                    }
+                });
+            });
+
+            // Handle Send WhatsApp button click
+            $('.send-whatsapp').on('click', function() {
+                let selectedCustomers = [];
+                $('input.form-check-input:checked').each(function() {
+                    selectedCustomers.push($(this).val());
+                });
+
+                if (selectedCustomers.length === 0) {
+                    alert('Please select at least one customer.');
+                    return;
+                }
+
+                // Store selected customers for use in the form submission
+                $('#whatsappTemplateForm').data('selectedCustomers', selectedCustomers);
+
+                // Open the WhatsApp template modal
+                $('#whatsappTemplateModal').modal('show');
+            });
+
+            $('#whatsappTemplateForm').on('submit', function(e) {
+                e.preventDefault();
+
+                let selectedCustomers = $(this).data('selectedCustomers'); // Retrieve selected customers
+                let formData = $(this).serializeArray();
+                let template = formData.find(field => field.name === 'whatsapp_template').value;
+
+                // Send the WhatsApp messages via AJAX to the backend
+                $.ajax({
+                    url: "{{ route('send.whatsapp') }}",
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        customer_ids: selectedCustomers,
+                        event: template
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                        $('#whatsappTemplateModal').modal('hide');
+                    },
+                    error: function(xhr) {
+                        toastr.error('An error occurred while sending WhatsApp messages.');
+                    }
+                });
+            });
+
+        });
+    </script>
 @endsection

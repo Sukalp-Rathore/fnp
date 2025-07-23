@@ -15,5 +15,7 @@ class Purchase extends Model
         'amount',
         'created_at',
         'payment_mode',
+        'payment_status',
+        'paid_amount'
     ];
 }

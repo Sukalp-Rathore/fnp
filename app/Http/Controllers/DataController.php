@@ -189,7 +189,6 @@ class DataController extends Controller
 
     public function deleteDuplicateCustomers()
     {
-        // Fetch all customers where at least one of the key fields is not null
         $customers = Customer::where(function($q) {
             $q->whereNotNull('customer_name')
               ->orWhereNotNull('customer_email')
@@ -202,7 +201,10 @@ class DataController extends Controller
         $groupAndDelete = function ($grouped) use (&$deletedCount, &$deletedIds) {
             foreach ($grouped as $group) {
                 if ($group->count() > 1) {
-                    $groupToDelete = $group->slice(1); // Keep the first one
+                    // Sort group by created_at DESC, keep the most recent one
+                    $sorted = $group->sortByDesc('created_at')->values();
+                    $groupToDelete = $sorted->slice(1); // Skip the newest
+    
                     foreach ($groupToDelete as $dup) {
                         $deletedIds[] = $dup->_id;
                         $dup->delete();
@@ -245,6 +247,7 @@ class DataController extends Controller
             'deleted_ids' => $deletedIds,
         ]);
     }
+    
 
     public function uploadCsv(Request $request)
     {
@@ -252,42 +255,152 @@ class DataController extends Controller
             'csv_file' => 'required|file|mimes:csv,txt',
         ]);
 
-        // Read the uploaded CSV file
         $file = $request->file('csv_file');
         $csvData = array_map('str_getcsv', file($file->getRealPath()));
-
-        // Skip the header row
         $header = array_shift($csvData);
+
         $created = 0;
+        $updated = 0;
+
         foreach ($csvData as $row) {
-            $flowerName = $row[1]; // Column 1: flower_name
-            $color = $row[2];      // Column 2: color
-            $sellingPrice = $row[3]; // Column 3: selling_price
-            // Generate the image file name
-            // Generate the image file name without replacing spaces or converting to lowercase
-            $imageFileName = $flowerName . ' ' . $color . '.png';
-            // dd($imageFileName);
-            // Path to the image in the public folder
-            $imagePath = public_path('assets/images/flowers/' . $imageFileName);
-            // dd($imagePath);
-            // Convert the image to base64 if it exists
-            $productImage = null;
-            if (file_exists($imagePath)) {
-                $imageData = file_get_contents($imagePath);
-                $mimeType = mime_content_type($imagePath); // Get the MIME type of the image
-                $productImage = 'data:' . $mimeType . ';base64,' . base64_encode($imageData);
+            $customerName = trim($row[2] ?? '');
+            if ($customerName === '') continue;
+
+            $customerAddress = trim($row[3] ?? '');
+
+            $rawPhone = trim($row[4] ?? '');
+            $firstPhone = preg_split('/[,\/]/', $rawPhone)[0] ?? '';
+            $customerPhone = preg_replace('/\D/', '', $firstPhone);
+            if ($customerPhone === '') continue;
+
+            $eventName = trim($row[5] ?? '');
+            $senderName = trim($row[6] ?? '');
+            $eventDate = trim($row[1] ?? '');
+
+            // Case-insensitive name match using MongoDB regex
+            $existingCustomer = Customer::where('customer_name', 'regexp', new \MongoDB\BSON\Regex('^' . preg_quote($customerName, '/') . '$', 'i'))
+                ->first();
+
+            if ($existingCustomer) {
+                $updatedFields = false;
+
+                if (empty($existingCustomer->event_date) && $eventDate) {
+                    $existingCustomer->event_date = $eventDate;
+                    $updatedFields = true;
+                }
+
+                if (empty($existingCustomer->event_name) && $eventName) {
+                    $existingCustomer->event_name = $eventName;
+                    $updatedFields = true;
+                }
+
+                if ($updatedFields) {
+                    $existingCustomer->save();
+                    $updated++;
+                }
+
+            } else {
+                Customer::create([
+                    'customer_name' => $customerName,
+                    'customer_address' => $customerAddress,
+                    'customer_phone' => $customerPhone,
+                    'event_name' => $eventName,
+                    'sender_name' => $senderName,
+                    'event_date' => $eventDate,
+                    'created_by' => 'CSV Upload June Dec',
+                ]);
+                $created++;
             }
-            // dd($productImage);
-            // Create an entry in the Inventory model
-            Inventory::create([
-                'product_name' => $flowerName,
-                'color' => $color,
-                'selling_price' => (int)$sellingPrice,
-                'product_image' => $productImage,
-            ]);
-            $created++; 
         }
-        return response()->json(['success' => true, 'message' => " $created CSV uploaded and inventory updated successfully"]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "$created customers created, $updated customers updated based on customer_name.",
+        ]);
     }
+
+    public function updateDates(Request $request)
+    {
+        $customers = Customer::all();
+        $updated = 0;
+        foreach ($customers as $customer) {
+            try {
+                if($customer->event_date == null || $customer->event_date == '') {
+                    continue; // Skip if event_date is null
+                }
+                // Convert event_date to UTC format
+                $eventDate = setutc($customer->event_date);
+                if ($eventDate) {
+                    // Update the event_date field in the database
+                    $customer->event_date = $eventDate;
+                    $customer->save();
+                    $updated++;
+                }
+            } catch (\Exception $e) {
+                // Log or handle errors
+                \Log::error("Failed to update event_date for customer ID: {$customer->_id}");
+            }
+        }
+        return response()->json(['success' => true, 'message' => "$updated Event dates updated to UTC format successfully"]);
+    }
+
+    // public function uploadCsv(Request $request)
+    // {
+    //     $request->validate([
+    //         'csv_file' => 'required|file|mimes:csv,txt',
+    //     ]);
+    
+    //     $file = $request->file('csv_file');
+    //     $csvData = array_map('str_getcsv', file($file->getRealPath()));
+    //     $header = array_shift($csvData); // skip header
+    
+    //     $created = 0;
+    //     $updated = 0;
+    
+    //     foreach ($csvData as $row) {
+    //         $customerName = trim($row[2] ?? '');
+    //         $customerAddress = trim($row[3] ?? '');
+    //         $rawPhone = trim($row[4] ?? '');
+    //         $eventName = trim($row[5] ?? '');
+    //         $senderName = trim($row[6] ?? '');
+    //         $eventDate = trim($row[1] ?? '');
+    
+    //         if ($customerName === '') continue;
+    
+    //         $firstPhone = preg_split('/[,\/]/', $rawPhone)[0] ?? '';
+    //         $customerPhone = preg_replace('/\D/', '', $firstPhone);
+    
+    //         // ✅ Normalized key for exact duplicate detection
+    //         $normalizedKey = strtolower($customerName) . '|' . $customerPhone;
+    
+    //         // Check if any record already exists with same normalized name and phone
+    //         $existingCustomer = Customer::all()->filter(function ($c) use ($normalizedKey) {
+    //             $existingKey = strtolower(trim($c->customer_name)) . '|' . preg_replace('/\D/', '', $c->customer_phone);
+    //             return $existingKey === $normalizedKey;
+    //         })->first();
+    
+    //         if ($existingCustomer) {
+    //             $existingCustomer->event_date = $eventDate;
+    //             $existingCustomer->save();
+    //             $updated++;
+    //         } else {
+    //             Customer::create([
+    //                 'customer_name' => $customerName,
+    //                 'customer_address' => $customerAddress,
+    //                 'customer_phone' => $customerPhone,
+    //                 'event_name' => $eventName,
+    //                 'sender_name' => $senderName,
+    //                 'event_date' => $eventDate,
+    //                 'created_by' => 'CSV Upload 23 june feb',
+    //             ]);
+    //             $created++;
+    //         }
+    //     }
+    
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => "$created customers created, $updated customers updated successfully.",
+    //     ]);
+    // }
     
 }

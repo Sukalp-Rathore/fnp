@@ -79,16 +79,18 @@ class VendorController extends Controller
         $request->validate([
             'vendorId' => 'required',
             'first_name' => 'required',
-            'email' => 'required|email',
-            'mobile' => 'required',
-            'city' => 'required',
-            'gender' => 'required',
+            'email' => 'nullable|email',
+            'mobile' => 'nullable',
+            'alternate_mobile' => 'nullable',
+            'city' => 'nullable',
+            'gender' => 'nullable',
         ]);
         $vendorId = $request->input('vendorId');
         $vendor = Vendor::where('_id', $vendorId)->first();
         $vendor->first_name = $request->input('first_name');
         $vendor->email = $request->input('email');
         $vendor->mobile = $request->input('mobile');
+        $vendor->alternate_mobile = $request->input('alternate_mobile');
         $vendor->city = $request->input('city');
         $vendor->gender = $request->input('gender');
         $vendor->save();

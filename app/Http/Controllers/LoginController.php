@@ -37,7 +37,7 @@ class LoginController extends Controller
         $userId = Session::get('user_id');
         Auth::loginUsingId($userId);
         
-        return response()->json(['success' => 'Login successful.'], 200);
+        return response()->json(['success' => true , 'message' => 'Login Successfull'], 200);
     }
 
     public function logout(Request $request)

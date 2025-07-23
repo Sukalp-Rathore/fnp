@@ -28,8 +28,8 @@
                                 <tr>
                                     <th>S.No</th>
                                     <th>Product Name</th>
+                                    <th>Color</th>
                                     <th>Type</th>
-                                    <th>Cost Price</th>
                                     <th>Selling Price</th>
                                     <th>Quantiy</th>
                                     <th>Stock Price</th>
@@ -39,14 +39,17 @@
                             </thead>
                             <tbody>
                                 @foreach ($products as $p)
+                                    @php
+                                        $stockPrice = $p->selling_price * ($p->quantity ?? 0);
+                                    @endphp
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $p->product_name }}</td>
+                                        <td>{{ $p->color }}</td>
                                         <td>{{ $p->type }}</td>
-                                        <td>{{ $p->cost_price }}</td>
                                         <td>{{ $p->selling_price }}</td>
                                         <td>{{ $p->quantity ?? '' }}</td>
-                                        <td>{{ $p->total_stock_amount ?? 'N/A' }}</td>
+                                        <td>{{ $stockPrice ?? 'N/A' }}</td>
                                         <td><button class="btn btn-secondary btn-sm viewProductImageBtn"
                                                 data-id="{{ $p->_id }}">View Image</button></td>
                                         <td>
@@ -80,6 +83,11 @@
                             <label for="product_name" class="form-label">Product Name</label>
                             <input type="text" class="form-control" id="product_name" name="product_name"
                                 placeholder="Enter Product Name" required autocomplete="off">
+                        </div>
+                        <div class="mb-3">
+                            <label for="color" class="form-label">Color</label>
+                            <input type="text" class="form-control" id="color" name="color"
+                                placeholder="Enter Product Color" required autocomplete="off">
                         </div>
                         <div class="mb-3">
                             <label for="type" class="form-label">Product Type</label>
@@ -287,7 +295,7 @@
             });
 
             $(document).on('click', '.deleteBtn', function() {
-                let vendorId = $(this).attr('data-id');
+                let productId = $(this).attr('data-id');
 
                 $.confirm({
                     title: 'Confirm Deletion',
@@ -301,7 +309,7 @@
                                     url: "{{ route('inventory.delete') }}",
                                     type: 'POST',
                                     data: {
-                                        vendorId: vendorId,
+                                        productId: productId,
                                         _token: '{{ csrf_token() }}' // add CSRF token manually if needed
                                     },
                                     success: function(response) {

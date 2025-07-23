@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\SendMail;
 use App\Models\Customer;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Http;
 
 class NotificationController extends Controller
 {
@@ -27,7 +28,7 @@ class NotificationController extends Controller
             }
     
             // Handle ordering
-            $columns = ['customer_name', 'customer_email', 'customer_phone', 'customer_type', 'created_at'];
+            $columns = ['customer_name', 'customer_email', 'customer_phone', 'event_name' , 'event_date' , 'customer_type', 'created_at'];
             $orderColumnIndex = $request->input('order.0.column', 0);
             $orderColumn = $columns[$orderColumnIndex] ?? 'customer_name';
             $orderDirection = $request->input('order.0.dir', 'asc');
@@ -64,21 +65,30 @@ class NotificationController extends Controller
             'mail_template' => 'required|string',
         ]);
 
-        $customers = Customer::whereIn('_id', $request->customer_ids)->get();
+        // Set subject based on mail template
+        $subjects = [
+            'rakhi' => 'Celebrate the Bond of Love this Rakhi – Pre-Book Now 🎁',
+            'diwali' => 'Light Up Their Diwali – Pre-Book Your Festive Gifts Today ✨',
+            'birthday' => 'Surprise Them on Their Birthday – Book Fresh Flowers & Gifts 🎂',
+            'anniversary' => 'Celebrate Love & Togetherness – Send Anniversary Surprises 💞',
+            'newyear' => 'Welcome 2026 with Fresh Flowers & Celebration Hampers 🎉'
+        ];
 
+        $subject = $subjects[$request->mail_template] ?? 'Flowers n Petals – Special Offer Just for You';
+        $customers = Customer::whereIn('_id', $request->customer_ids)->get();
         foreach ($customers as $customer) {
             $details = [
-                'subject' => 'Notification Email',
-                'title' => 'Hello ' . $customer->customer_name,
-                'body' => 'This is a notification email.'
+                'customer_name' => $customer->customer_name
             ];
-
+            if($customer->customer_email == null) {
+                continue; // Skip if email is not set
+            }
+            // $customer->customer_email= "sukalprathore@gmail.com";
             // Dynamically reference the selected mail template from the Emails folder
             $templatePath = 'Emails.' . $request->mail_template;
-
-            Mail::send($templatePath, ['details' => $details], function ($message) use ($customer, $details) {
+            Mail::send($templatePath, ['details' => $details], function ($message) use ($customer, $details, $subject) {
                 $message->to($customer->customer_email)
-                        ->subject($details['subject']);
+                        ->subject($subject);
             });
         }
 
@@ -92,37 +102,59 @@ class NotificationController extends Controller
     {
         $request->validate([
             'customer_ids' => 'required|array',
-            'customer_ids.*' => 'exists:customers,id',
+            'event' => 'required|string',
         ]);
-
-        $customers = Customer::whereIn('id', $request->customer_ids)->get();
-
+    
+        // Fetch customer phone numbers and names
+        $customers = Customer::whereIn('_id', $request->customer_ids)->get();
+    
+        $toAndComponents = [];
         foreach ($customers as $customer) {
-            // send whatsapp messages from here 
+            if (empty($customer->customer_phone)) {
+                continue; // Skip if phone number is not set
+            }
+            $phone = preg_replace('/\D/', '', $customer->customer_phone); // Remove non-numeric characters
+            $formattedPhone = strlen($phone) === 10 ? '91' . $phone : $phone; // Add '91' if length is 10
+            // $formattedPhone = "919340260519";
+            $toAndComponents[] = [
+                "to" => [$formattedPhone],
+                "components" => [
+                    "body_1" => [
+                        "type" => "text",
+                        "value" => $customer->customer_name // Dynamically send customer_name
+                    ]
+                ]
+            ];  
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Whatsapp Messages sent successfully to the selected customers.',
-        ]);
+    
+        $payload = [
+            "integrated_number" => "918109535634",
+            "content_type" => "template",
+            "payload" => [
+                "messaging_product" => "whatsapp",
+                "type" => "template",
+                "template" => [
+                    "name" => $request->event,
+                    "language" => [
+                        "code" => "en",
+                        "policy" => "deterministic"
+                    ],
+                    "namespace" => "a6f0d3b7_77f1_463a_94dd_a8c9f5054401",
+                    "to_and_components" => $toAndComponents
+                ]
+            ]
+        ];
+    
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'authkey' => '451815AXQYneFUH686786fbP1' // Replace with your actual authkey
+        ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/', $payload);
+    
+        if ($response->successful()) {
+            return response()->json(['success' => true, 'message' => 'WhatsApp messages sent successfully.']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Failed to send WhatsApp messages.'], $response->status());
+        }
     }
 
-    public function sendSms(Request $request)
-    {
-        $request->validate([
-            'customer_ids' => 'required|array',
-            'customer_ids.*' => 'exists:customers,id',
-        ]);
-
-        $customers = Customer::whereIn('id', $request->customer_ids)->get();
-
-        foreach ($customers as $customer) {
-            // send SMS messages from here 
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'SMS Messages sent successfully to the selected customers.',
-        ]);
-    }
 }

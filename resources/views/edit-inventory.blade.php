@@ -7,6 +7,11 @@
         <input type="text" class="form-control" id="product_name" name="product_name"
             value="{{ $product->product_name }}" required>
     </div>
+    <div class="mb-3">
+        <label for="color" class="form-label">Color</label>
+        <input type="text" class="form-control" id="color" name="color" value="{{ $product->color ?? '' }}"
+            required>
+    </div>
 
     <div class="mb-3">
         <label for="type" class="form-label">Product Type</label>

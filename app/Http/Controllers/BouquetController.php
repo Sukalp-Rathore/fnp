@@ -45,6 +45,7 @@ class BouquetController extends Controller
                 $totalPrice += $inventoryItem->selling_price * $item['quantity'];
                 $itemsArray[] = [
                     'item_name' => $inventoryItem->product_name,
+                    'color' => $inventoryItem->color, // Assuming color is a field in Inventory
                     'quantity' => (int)$item['quantity'],
                 ];
     
@@ -67,8 +68,9 @@ class BouquetController extends Controller
             'customer_name' => $request->customer_name,
             'customer_email' => $request->customer_email,
             'customer_phone' => $request->customer_phone,
-            'delivery_date' => $request->delivery_date,
+            'delivery_date' => setutc($request->delivery_date),
             'delivery_address' => $request->delivery_address,
+            'created_by' => $request->created_by,
             'bouquet_image' => 'data:' . $image->getMimeType() . ';base64,' . $base64Image,
         ]);
     
@@ -170,7 +172,7 @@ class BouquetController extends Controller
         $bouquet->customer_name = $request->edit_customer_name;
         $bouquet->customer_email = $request->edit_customer_email;
         $bouquet->customer_phone = $request->edit_customer_phone;
-        $bouquet->delivery_date = $request->edit_delivery_date;
+        $bouquet->delivery_date = setutc($request->edit_delivery_date);
         $bouquet->delivery_address = $request->edit_delivery_address;
         $bouquet->save();
     
@@ -196,6 +198,7 @@ class BouquetController extends Controller
         $items = collect($bouquet->items)->map(function ($item) {
             return [
                 'item_name' => $item['item_name'],
+                'color' => $item['color'] ?? 'N/A', // Handle color if it exists
                 'quantity' => $item['quantity'],
             ];
         });

@@ -119,7 +119,7 @@
         <div class="col-xxl-6 col-xl-7">
             <div class="row justify-content-center align-items-center h-100">
                 <div class="col-xxl-8 col-xl-9 col-lg-6 col-md-6 col-sm-8 col-12">
-                    <img src="assets/images/brand-logos/fnp-gift.svg" alt=""
+                    <img src="assets/images/brand-logos/fnp-logo.jpeg" alt=""
                         class="authentication-brand desktop-white mb-3 log-logo">
                     <div class="card custom-card my-auto border">
                         <div class="card-body p-5">

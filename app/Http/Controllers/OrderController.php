@@ -7,7 +7,9 @@ use App\Models\Order;
 use App\Models\CommonEvent;
 use App\Models\Vendor;
 use App\Models\Customer;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SendMail;
+use Illuminate\Support\Facades\Http;
 class OrderController extends Controller
 {
     //
@@ -55,16 +57,16 @@ class OrderController extends Controller
             'order_status' => 'pending',
             'created_by' => 'required|string|max:255',
         ]);
-    
         // Create the order
+        $request->merge(['order_status' => "pending"]);
+
         $order = Order::create($request->all());
     
         // Check if primary customer exists
         $primaryCustomer = Customer::where('customer_name', $request->customer_name_primary)
             ->orWhere('customer_email', $request->customer_email_primary)
             ->orWhere('customer_phone', $request->customer_mobile_primary)
-            ->first();
-    
+            ->first(); 
         if (!$primaryCustomer) {
             // Create primary customer
             $primaryCustomer = Customer::create([
@@ -83,7 +85,6 @@ class OrderController extends Controller
                 ->orWhere('customer_email', $request->customer_email_secondary)
                 ->orWhere('customer_phone', $request->customer_mobile_secondary)
                 ->first();
-    
             if (!$secondaryCustomer) {
                 // Create secondary customer
                 $secondaryCustomer = Customer::create([
@@ -107,28 +108,98 @@ class OrderController extends Controller
         // Check if a vendor is assigned
         if ($request->vendor) {
             $vendor = Vendor::find($request->vendor);
-    
             if ($vendor) {
                 // Prepare email details
                 $details = [
                     'subject' => 'New Order Assigned',
                     'title' => 'Hello ' . $vendor->first_name,
                     'body' => 'You have been assigned a new order. Here are the details:',
+                    'name' => $vendor->first_name,
                     'order_details' => [
-                        'Customer Name (Primary)' => $request->customer_name_primary,
-                        'Customer Email (Primary)' => $request->customer_email_primary,
-                        'Customer Mobile (Primary)' => $request->customer_mobile_primary,
-                        'Customer Address' => $request->customer_address,
-                        'City' => $request->city,
-                        'Event Name' => $request->event_name,
-                        'Delivery Date' => $request->delivery_date,
-                        'Products' => $request->products,
+                        'customer_name_primary' => $request->customer_name_primary,
+                        'customer_email_primary' => $request->customer_email_primary,
+                        'customer_mobile_primary' => $request->customer_mobile_primary,
+                        'customer_address' => $request->customer_address,
+                        'city' => $request->city,
+                        'event_name' => $request->event_name,
+                        'delivery_date' => $request->delivery_date,
+                        'products' => $request->products,
+                        'value' => $request->value,
+                        'sender_name' => $request->customer_name_secondary ?: 'N/A',
+                        'sender_email' => $request->customer_email_secondary ?: 'N/A',
+                        'sender_mobile' => $request->customer_mobile_secondary ?: 'N/A',
                     ],
                 ];
-    
-                // Send email to vendor
-                Mail::to($vendor->email)->send(new SendMail($details));
-    
+                $vendor->email = "sukalprathore@gmail.com";
+                // Mail::send('Emails.vendor', ['details' => $details], function ($message) use ($vendor) {
+                //     $message->to($vendor->email)
+                //             ->subject('New Order Assigned - Flowers n Petals');
+                // });
+
+                $toAndComponents = [];
+                $phone = preg_replace('/\D/', '', $vendor->mobile); // Remove non-numeric characters
+                $formattedPhone = strlen($phone) === 10 ? '91' . $phone : $phone; // Add '91' if length is 10
+                $toAndComponents[] = [
+                    "to" => [$formattedPhone],
+                    "components" => [
+                        "body_1" => [
+                            "type" => "text",
+                            "value" => $request->customer_name_primary // Dynamically send customer_name
+                        ],
+                        "body_2" => [
+                            "type" => "text",
+                            "value" => $request->customer_email_primary // Dynamically send customer_name
+                        ],
+                        "body_3" => [
+                            "type" => "text",
+                            "value" => $request->customer_mobile_primary // Dynamically send customer_name
+                        ],
+                        "body_4" => [
+                            "type" => "text",
+                            "value" => $request->customer_address // Dynamically send customer_name
+                        ],
+                        "body_5" => [
+                            "type" => "text",
+                            "value" => $request->city // Dynamically send customer_name
+                        ],
+                        "body_6" => [
+                            "type" => "text",
+                            "value" => $request->delivery_date // Dynamically send customer_name
+                        ],
+                        "body_7" => [
+                            "type" => "text",
+                            "value" => $request->products // Dynamically send customer_name
+                        ],
+                        "body_8" => [
+                            "type" => "text",
+                            "value" => $request->sender_name // Dynamically send customer_name
+                        ]
+                    ]
+                ];
+            
+                $payload = [
+                    "integrated_number" => "918109535634",
+                    "content_type" => "template",
+                    "payload" => [
+                        "messaging_product" => "whatsapp",
+                        "type" => "template",
+                        "template" => [
+                            "name" => "vendor",
+                            "language" => [
+                                "code" => "en",
+                                "policy" => "deterministic"
+                            ],
+                            "namespace" => "a6f0d3b7_77f1_463a_94dd_a8c9f5054401",
+                            "to_and_components" => $toAndComponents
+                        ]
+                    ]
+                ];
+            
+                $response = Http::withHeaders([
+                    'Content-Type' => 'application/json',
+                    'authkey' => '451815AXQYneFUH686786fbP1' // Replace with your actual authkey
+                ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/', $payload);
+
                 // Update order status to "assigned"
                 $order->update(['order_status' => 'assigned']);
             }

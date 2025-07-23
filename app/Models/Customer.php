@@ -21,6 +21,7 @@ class Customer extends Model
         'product',
         'product_value',
         'message',
+        'secondary_customers',
         'forward_date',
         'created_by',
         'event_date',

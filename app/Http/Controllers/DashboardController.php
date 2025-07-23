@@ -11,6 +11,7 @@ use App\Models\Sale;
 use App\Models\Purchase;
 use App\Models\FestivalEvent;
 use Carbon\Carbon;
+use App\Models\Vendor;
 
 class DashboardController extends Controller
 {
@@ -26,29 +27,38 @@ class DashboardController extends Controller
             ->whereYear('event_date', $currentYear)
             ->where('event_date', '>=', Carbon::now()) // Only future events
             ->get();
-        // dd($futureEventsInCurrentMonth);   
+        // dd($futureEventsInCurrentMonth);
 
         // KPI 2: Fetch customers with event_date in the current month (excluding past days)
         $customersWithFutureEvents = Customer::whereMonth('event_date', $currentMonth)
             ->whereYear('event_date', $currentYear)
             ->where('event_date', '>=', Carbon::now()) // Only future events
             ->get();
-
+        // dd($customersWithFutureEvents);
         // KPI3 
         // Fetch the latest upcoming event
         $latestUpcomingEvent = FestivalEvent::where('event_date', '>=', Carbon::now())
             ->orderBy('event_date', 'asc')
             ->first();
-
+        // dd($latestUpcomingEvent);
         // Fetch all customers with the same event_name
         $customers = Customer::where('event_name', $latestUpcomingEvent->events)->get();
         // dd($customers);
 
         // Fetch customers whose event_date is within the next 15 days
-        $customersUp = Customer::whereBetween('event_date', [
-            Carbon::now(),
-            Carbon::now()->addDays(15)
-        ])->get();
+        // Fetch customers whose event_date is within the next 15 days
+        $today = Carbon::now();
+        $endDate = $today->copy()->addDays(15);
+
+        // Get all customers
+        $customerst = Customer::whereNotNull('event_date')->get();
+
+        // Filter manually based on month & day
+        $customersUp = $customerst->filter(function ($customer) use ($today, $endDate) {
+            $event = Carbon::parse(getutc($customer->event_date))->setYear($today->year);
+
+            return $event->between($today, $endDate);
+        });
 
         
         // Check if the user selected "This Month"
@@ -82,8 +92,12 @@ class DashboardController extends Controller
                 ->get()
                 ->groupBy('vendor')
                 ->map(function ($orders, $vendor) {
+                    $a = Vendor::find($vendor);
+                    if (!$a) {
+                        return null; // Skip if vendor not found
+                    } 
                     return [
-                        'vendor' => $vendor,
+                        'vendor' => $a->first_name,
                         'total_revenue' => $orders->sum('order_price'),
                     ];
                 })
@@ -99,8 +113,12 @@ class DashboardController extends Controller
                 ->get()
                 ->groupBy('vendor')
                 ->map(function ($orders, $vendor) {
+                    $a = Vendor::find($vendor);
+                    if (!$a) {
+                        return null; // Skip if vendor not found
+                    } 
                     return [
-                        'vendor' => $vendor,
+                        'vendor' => $a->first_name,
                         'total_revenue' => $orders->sum('order_price'),
                     ];
                 })

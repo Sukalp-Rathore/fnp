@@ -1,4 +1,4 @@
-<form id="addCustomerForm" method="POST" action="{{ route('customer.update') }}">
+<form id="editCustomerForm" method="POST" action="{{ route('customer.update') }}">
     {{-- CSRF Token --}}
     @csrf
     <input type="hidden" name="customerId" id="customerId" value="{{ $customer->_id }}">
@@ -42,8 +42,8 @@
                     {{ isset($customer) && strtolower($customer->event_name) == strtolower($event) ? 'selected' : '' }}>
                     {{ $event }}</option>
             @endforeach
-            <option value=""
-                {{ isset($customer) && strtolower($customer->event_name) == '' ? 'selected' : '' }}>None</option>
+            <option value="" {{ isset($customer) && strtolower($customer->event_name) == '' ? 'selected' : '' }}>
+                None</option>
         </select>
     </div>
     <div class="mb-3">

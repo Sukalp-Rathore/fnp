@@ -13,9 +13,10 @@
             <thead>
                 <tr>
                     <th>Product Name</th>
+                    <th>Color</th>
                     <th>Type</th>
-                    <th>Cost Price</th>
                     <th>Selling Price</th>
+                    <th>Current Quanity In Bouquet</th>
                     <th>Available Quantity</th>
                     <th>Quantity in Bouquet</th>
                 </tr>
@@ -23,23 +24,23 @@
             <tbody>
                 @foreach ($inventory as $item)
                     @php
-                        // Check if quantity exists and is greater than 0
                         $quantity = $item->quantity ?? 0;
-                    @endphp
-                    @php
-                        $bouquetItem = collect($bouquet->items)->firstWhere('item_name', $item->product_name);
+
+                        $bouquetItem = collect($bouquet->items)->first(function ($bItem) use ($item) {
+                            return $bItem['item_name'] === $item->product_name && $bItem['color'] === $item->color;
+                        });
+
                         $quantityInBouquet = $bouquetItem ? $bouquetItem['quantity'] : 0;
                     @endphp
-                    <tr>
+
+                    <tr class="{{ $quantityInBouquet > 0 ? 'table-success' : '' }}">
                         <td>{{ $item->product_name }}</td>
+                        <td>{{ $item->color }}</td>
                         <td>{{ $item->type }}</td>
-                        <td>{{ $item->cost_price }}</td>
                         <td>{{ $item->selling_price }}</td>
-                        <td>{{ $item->quantity }}</td>
+                        <td data-order="{{ $quantityInBouquet }}">{{ $quantityInBouquet }}</td>
+                        <td>{{ $quantity }}</td>
                         <td>
-                            <input type="number" class="form-control add-quantity"
-                                name="items[{{ $loop->index }}][quantity]" min="0" max="{{ $quantity }}"
-                                placeholder="0" {{ $quantity <= 0 ? 'disabled' : '' }}>
                             <input type="number" class="form-control edit-quantity"
                                 name="items[{{ $loop->index }}][quantity]" value="{{ $quantityInBouquet }}"
                                 min="0" max="{{ $item->quantity + $quantityInBouquet }}"
@@ -100,16 +101,28 @@
 
 <script src="assets/js/datatables.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", (event) => {
+    document.addEventListener("DOMContentLoaded", function() {
+        let bouquetItems = {!! json_encode(
+            collect($bouquet->items)->map(function ($item) {
+                return strtolower(trim($item['item_name'] . '|' . $item['color']));
+            }),
+        ) !!};
+
+        if ($.fn.DataTable.isDataTable('#datatable-basic')) {
+            $('#datatable-basic').DataTable().destroy();
+        }
+
         $('#datatable-basic').DataTable({
+            pageLength: 100,
+            ordering: false,
             language: {
                 searchPlaceholder: 'Search...',
                 sSearch: '',
-            },
-            "pageLength": 10,
-            // scrollX: true
+            }
         });
     });
+</script>
+<script>
     $(document).ready(function() {
         // Image preview
         $('#bouquet_imagett').on('change', function() {

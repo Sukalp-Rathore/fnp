@@ -1,19 +1,10 @@
 <?php
-require 'vendor/mongodb/mongodb/src/BulkWriteResult.php';
 
+namespace App\Helpers;
+use MongoDB\BSON\UTCDateTime;
+use DateTime;
 use Carbon\Carbon;
 
-function getPreviousMonts() { 
-
-$currentMonth = date('M'); // Current month full name (e.g., January)
-$previousMonth1 = date('M', strtotime('-1 month')); // Previous month
-$previousMonth2 = date('M', strtotime('-2 months')); // Two months ago
-
-$monthArray = [$previousMonth2, $previousMonth1, $currentMonth];
-
-return $monthArray;
-
-}
 
 function getEvents(){
     $events = ['Birthday' , 'Anniversary' , 'Wedding' , 'Engagement' , 'Housewarming' , 'Baby Shower' , 'Graduation' , 'Promotion' , 'Farewell' , 'Get Well Soon' , 'Thank You' , 'Congratulations' , 'Sympathy'];
@@ -94,14 +85,35 @@ function conf(string $param){
    return Config::get("app.$param");
 }
 
-function setutc($date = null){
+function setutc($date = null)
+{
+    $timestamp = null;
 
-    if(is_null($date))
-    return  new \MongoDB\BSON\UTCDateTime((strtotime("NOW") + conf('time')) * 1000);
+    if (is_null($date)) {
+        $timestamp = time();
+    } elseif ($date instanceof \DateTime) {
+        $timestamp = $date->getTimestamp();
+    } elseif (is_numeric($date)) {
+        $timestamp = (int) $date;
+    } elseif (is_string($date)) {
+        // Handle dd.mm.yyyy or dd-mm-yyyy format
+        if (preg_match("/^\d{2}[.\-\/]\d{2}[.\-\/]\d{4}$/", $date)) {
+            $dt = \DateTime::createFromFormat('d.m.Y', $date) 
+                ?: \DateTime::createFromFormat('d-m-Y', $date) 
+                ?: \DateTime::createFromFormat('d/m/Y', $date);
+            if ($dt) $timestamp = $dt->getTimestamp();
+        } else {
+            $timestamp = strtotime($date);
+        }
+    }
 
-    return  new \MongoDB\BSON\UTCDateTime((strtotime($date) + conf('time')) * 1000);
+    if ($timestamp === false || $timestamp === null) {
+        return null; // invalid date
+    }
 
+    return new \MongoDB\BSON\UTCDateTime(($timestamp + conf('time')) * 1000);
 }
+
 
 function checkIsAValidDate($myDateString){
     return (bool)strtotime($myDateString);
@@ -132,38 +144,35 @@ function getutc($date, string $format = "Y-m-d H:i:s")
     if (empty($date)) return "";
 
     try {
-        // If the date is already a UTCDateTime, convert it directly
         if ($date instanceof \MongoDB\BSON\UTCDateTime) {
             $datetime = $date->toDateTime();
-        } 
-        // If it's a DateTime object
-        elseif ($date instanceof \DateTime) {
+        } elseif ($date instanceof \DateTime) {
             $datetime = $date;
-        } 
-        // If it's a valid timestamp (int or numeric string)
-        elseif (is_numeric($date)) {
-            // MongoDB UTCDateTime expects milliseconds
-            $utcdatetime = new \MongoDB\BSON\UTCDateTime((int)$date * 1000);
-            $datetime = $utcdatetime->toDateTime();
-        } 
-        // If it's a date string (e.g., "2024-04-21 12:00:00")
-        elseif (is_string($date)) {
-            $timestamp = strtotime($date);
-            if ($timestamp === false) throw new \Exception("Invalid date string");
-            $utcdatetime = new \MongoDB\BSON\UTCDateTime($timestamp * 1000);
-            $datetime = $utcdatetime->toDateTime();
-        } 
-        else {
-            // Unsupported format
+        } elseif (is_numeric($date)) {
+            $datetime = (new \MongoDB\BSON\UTCDateTime((int)$date * 1000))->toDateTime();
+        } elseif (is_string($date)) {
+            // dd.mm.yyyy
+            if (preg_match("/^\d{2}[.\-\/]\d{2}[.\-\/]\d{4}$/", $date)) {
+                $dt = \DateTime::createFromFormat('d.m.Y', $date)
+                    ?: \DateTime::createFromFormat('d-m-Y', $date)
+                    ?: \DateTime::createFromFormat('d/m/Y', $date);
+                if (!$dt) throw new \Exception("Invalid custom date format");
+                $datetime = $dt;
+            } else {
+                $timestamp = strtotime($date);
+                if ($timestamp === false) throw new \Exception("Invalid date string");
+                $datetime = (new \MongoDB\BSON\UTCDateTime($timestamp * 1000))->toDateTime();
+            }
+        } else {
             throw new \Exception("Unsupported date format");
         }
 
         return $datetime->format($format);
     } catch (\Exception $e) {
-        // Optional: log error here if needed
         return "";
     }
 }
+
 // new end 
 
 function getDatesFromRange($start, $end, $format = 'Y-m-d') {

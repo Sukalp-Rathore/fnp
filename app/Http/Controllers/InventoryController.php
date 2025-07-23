@@ -11,19 +11,23 @@ class InventoryController extends Controller
     //
     public function inventory()
     {
+        // Fetch all products
         $products = Inventory::get();
+    
+        // Dynamically calculate total stock amount
         $totalStockAmount = 0;
-        foreach($products as $product){
-            $price = $product->total_stock_amount;
-            $totalStockAmount += $price;
+        foreach ($products as $product) {
+            $totalStockAmount += $product->selling_price * $product->quantity; // Calculate dynamically
         }
-        return view('inventory' ,compact('products','totalStockAmount'));
+    
+        return view('inventory', compact('products', 'totalStockAmount'));
     }
 
     public function createInventory(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'product_name' => 'required|string|max:255',
+            'color' => 'required|string|max:50', // New field for color
             'type' => 'required|string',
             'selling_price' => 'nullable|numeric',
             'product_image' => 'nullable|image|max:2048', // max 2MB
@@ -48,7 +52,6 @@ class InventoryController extends Controller
         $product->product_name = $request->product_name;
         $product->type = $request->type;
         $product->selling_price = (int)$request->selling_price;
-        $product->total_stock_amount = 0 ; // Assuming total stock price is cost price * 100
         $product->product_image = $base64Image; // base64 image stored in MongoDB
         $product->save();
 
@@ -96,6 +99,7 @@ class InventoryController extends Controller
         $request->validate([
             'product_id' => 'required|string',
             'product_name' => 'required|string|max:255',
+            'color' => 'required|string|max:50',
             'type' => 'required|string',
             'selling_price' => 'required|numeric',
             'product_image' => 'nullable|image|max:2048', // Max 2MB
@@ -110,8 +114,8 @@ class InventoryController extends Controller
         // Update product details
         $product->product_name = $request->product_name;
         $product->type = $request->type;
+        $product->color = $request->color; // Update color
         $product->selling_price = (int)$request->selling_price;
-        $product->total_stock_amount = (int)$product->selling_price * $product->quantity; // Update total stock amount
 
         // Handle image upload
         if ($request->hasFile('product_image')) {
@@ -131,11 +135,11 @@ class InventoryController extends Controller
     public function deleteInventory(Request $request)
     {
         $request->validate([
-            'vendorId' => 'required',
+            'productId' => 'required',
         ]);
-        $vendorId = $request->input('vendorId');
-        Vendor::where('_id', $vendorId)->delete();
-        return response()->json(['success' => true, 'message' => 'Vendor deleted successfully']);
+        $product = $request->input('productId');
+        Inventory::where('_id', $product)->delete();
+        return response()->json(['success' => true, 'message' => 'Product deleted successfully']);
     }
 
     public function fetchStock()
@@ -156,7 +160,6 @@ class InventoryController extends Controller
             $product = Inventory::where('_id', $item['id'])->first();
             if ($product) {
                 $product->quantity = $product->quantity + (int)$item['quantity'];
-                $product->total_stock_amount = (int)$product->selling_price * $product->quantity; // Update total stock amount
                 $product->save();
             }
         }

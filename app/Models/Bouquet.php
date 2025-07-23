@@ -20,6 +20,7 @@ class Bouquet extends Model
         'delivery_date',
         'delivery_address',
         'bouquet_image',
+        'created_by',
     ];
 }
  

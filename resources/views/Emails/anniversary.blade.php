@@ -3,8 +3,8 @@
 
 <head>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-    <title>Christmas Is Coming</title>
-    <meta name="description" content="Rakhi Is Coming.">
+    <title>Happy Anniversary !</title>
+    <meta name="description" content="Happy Anniversary !">
     <style type="text/css">
         a:hover {
             text-decoration: underline !important;
@@ -37,33 +37,36 @@
                                     <td style="padding:0 35px;">
                                         <h1
                                             style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">
-                                            Make Their Christmas Merrier – Pre-Book Your Festive Gifts 🎅✨</h1>
+                                            Celebrate Love That Grows – Thoughtful Anniversary Gifts Await 💝
+                                        </h1>
                                         <span
-                                            style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
+                                            style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;text-align:left"></span>
                                         <p
                                             style="color:#455056; font-size:15px;line-height:24px; margin:0;text-align:left;">
-                                            Dear {{ $details['customer_name'] }}, <br>
-                                            <br>
-                                            Christmas is a season of giving, joy, and heartfelt connections. Whether
-                                            it’s flowers to brighten their home or gifts to warm their heart, Flowers n
-                                            Petals is here to help you spread cheer.
+                                            Dear {{ $details['customer_name'] }},<br><br>
+
+                                            Anniversaries are a beautiful reminder of cherished moments and growing
+                                            love.
                                             <br><br>
-                                            This Christmas, choose from:
+
+                                            Make the day unforgettable with Flowers n Petals:
                                             <br><br>
-                                            🎄 Festive floral arrangements <br>
-                                            🎁 Handcrafted gift hampers <br>
-                                            🍫 Chocolates, cookies & holiday treats <br>
-                                            🎅 Santa-themed combos & décor <br>
-                                            <br>
-                                            ✨ Make your presence felt—even from afar—with timely, joyful deliveries.
+                                            💐 Romantic flower bouquets<br>
+                                            🍰 Cake & chocolate combos<br>
+                                            🎁 Elegant couple hampers<br>
+                                            🚚 On-time doorstep delivery<br><br>
+
+                                            💞 Whether it’s your love story or someone close, express heartfelt wishes
+                                            with timeless gifts.
                                             <br><br>
-                                            Pre-book your Christmas surprises now and let your loved ones unwrap a
-                                            bundle of smiles.
+
+                                            💌 Book your anniversary surprise now and let love bloom beautifully.
                                             <br><br>
-                                            Wishing you love, light, and peace this season,<br>
-                                            Team Flowers n Petals <br>
-                                            📞 9893056096 | 📍 Indore <br>
-                                            📲 WhatsApp us for orders | flowersnpetals.net
+
+                                            Warm wishes,<br>
+                                            Team Flowers n Petals<br>
+                                            📞 9893056096 | 📍 Indore<br>
+                                            📲 WhatsApp us | flowersnpetals.net<br>
                                         </p>
                                     </td>
                                 </tr>

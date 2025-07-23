@@ -153,12 +153,12 @@
                     <div class="header-element">
                         <div class="horizontal-logo">
                             <a href="index.html" class="header-logo">
-                                <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo" class="desktop-logo">
-                                <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo" class="toggle-dark">
-                                <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo" class="desktop-dark">
-                                <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo" class="toggle-logo">
-                                <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo" class="toggle-white">
-                                <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo" class="desktop-white">
+                                <img src="assets/images/brand-logos/fnp-logo.jpeg" alt="logo" class="desktop-logo">
+                                <img src="assets/images/brand-logos/fnp-logo.jpeg" alt="logo" class="toggle-dark">
+                                <img src="assets/images/brand-logos/fnp-logo.jpeg" alt="logo" class="desktop-dark">
+                                <img src="assets/images/brand-logos/fnp-logo.jpeg" alt="logo" class="toggle-logo">
+                                <img src="assets/images/brand-logos/fnp-logo.jpeg" alt="logo" class="toggle-white">
+                                <img src="assets/images/brand-logos/fnp-logo.jpeg" alt="logo" class="desktop-white">
                             </a>
                         </div>
                     </div>
@@ -216,8 +216,8 @@
             <!-- Start::main-sidebar-header -->
             <div class="main-sidebar-header">
                 <a class="header-logo">
-                    <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo" class="desktop-dark ttmain">
-                    <img src="assets/images/brand-logos/fnp-gift.svg" alt="logo" class="toggle-dark">
+                    <img src="assets/images/brand-logos/fnp-logo.jpeg" alt="logo" class="desktop-dark ttmain">
+                    <img src="assets/images/brand-logos/fnp-logo.jpeg" alt="logo" class="toggle-dark">
                 </a>
             </div>
             <!-- End::main-sidebar-header -->

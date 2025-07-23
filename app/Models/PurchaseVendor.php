@@ -11,6 +11,8 @@ class PurchaseVendor extends Model
     use HasFactory;
     protected $collection = 'purchase_vendors';
     protected $fillable = [
-        'name'
+        'name',
+        'total_purchase',
+        'amount_pending'
     ];
 }

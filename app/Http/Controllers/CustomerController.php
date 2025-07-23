@@ -29,7 +29,7 @@ class CustomerController extends Controller
             $orderDirection = $request->input('order.0.dir', 'asc');
             
             // Map index to column name
-            $columns = ['customer_name', 'customer_email', 'customer_phone', 'customer_address', 'customer_event', 'customer_type', 'created_at'];
+            $columns = ['customer_name', 'customer_email', 'customer_phone', 'customer_address', 'event_name','event_date','customer_type', 'created_at'];
             $orderColumn = $columns[$orderColumnIndex] ?? 'customer_name';
     
             // Apply sorting
@@ -139,10 +139,10 @@ class CustomerController extends Controller
         $request->validate([
             'customerId' => 'required',
             'customer_name' => 'required|string',
-            'customer_email' => 'required|email',
-            'customer_phone' => 'required|',
+            'customer_email' => 'nullable|email',
+            'customer_phone' => 'nullable',
             'customer_address' => 'nullable|string',
-            'customer_type' => 'required|string',
+            'customer_type' => 'nullable|string',
             'customer_event' => 'nullable|string',
         ]);
         $customerId = $request->input('customerId');
