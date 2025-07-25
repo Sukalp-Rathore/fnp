@@ -51,6 +51,7 @@ class InventoryController extends Controller
         $product = new Inventory();
         $product->product_name = $request->product_name;
         $product->type = $request->type;
+        $product->color = $request->color;
         $product->selling_price = (int)$request->selling_price;
         $product->product_image = $base64Image; // base64 image stored in MongoDB
         $product->save();

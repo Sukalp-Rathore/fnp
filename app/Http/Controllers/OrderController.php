@@ -48,6 +48,7 @@ class OrderController extends Controller
             'customer_address' => 'required|string|max:500',
             'city' => 'required|string|max:255',
             'event_name' => 'required|string|max:255',
+            'event_date' => 'required|date',
             'delivery_date' => 'required|date',
             'products' => 'required|string',
             'customer_name_secondary' => 'nullable|string|max:255',
@@ -75,6 +76,7 @@ class OrderController extends Controller
                 'customer_phone' => $request->customer_mobile_primary,
                 'customer_address' => $request->customer_address,
                 'event_name' => $request->event_name,
+                'event_date' => $request->event_date,
                 'customer_type' => 'primary',
             ]);
         }
@@ -93,6 +95,7 @@ class OrderController extends Controller
                     'customer_phone' => $request->customer_mobile_secondary,
                     'customer_address' => $request->customer_address,
                     'event_name' => $request->event_name,
+                    'event_date' => $request->event_date,
                     'customer_type' => 'secondary',
                 ]);
             }
