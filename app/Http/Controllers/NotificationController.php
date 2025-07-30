@@ -85,7 +85,7 @@ class NotificationController extends Controller
             }
             // $customer->customer_email= "sukalprathore@gmail.com";
             // Dynamically reference the selected mail template from the Emails folder
-            $templatePath = 'Emails.' . $request->mail_template;
+            $templatePath = 'emails.' . $request->mail_template;
             Mail::send($templatePath, ['details' => $details], function ($message) use ($customer, $details, $subject) {
                 $message->to($customer->customer_email)
                         ->subject($subject);
@@ -115,7 +115,6 @@ class NotificationController extends Controller
             }
             $phone = preg_replace('/\D/', '', $customer->customer_phone); // Remove non-numeric characters
             $formattedPhone = strlen($phone) === 10 ? '91' . $phone : $phone; // Add '91' if length is 10
-            // $formattedPhone = "919340260519";
             $toAndComponents[] = [
                 "to" => [$formattedPhone],
                 "components" => [

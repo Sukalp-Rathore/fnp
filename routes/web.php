@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DashBoardController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\NotificationController;
@@ -24,7 +24,7 @@ Route::middleware(['web' ,'auth'])->group(function () {
     Route::get('/', function () {
         return view('dashboard');
     });
-    Route::get('/dashboard', [DashBoardController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('/mails', [NotificationController::class, 'index'])->name('mails');
     Route::post('/send-mail', [NotificationController::class, 'sendMail'])->name('send.mail');
     Route::post('/send-whatsapp', [NotificationController::class, 'sendWhatsapp'])->name('send.whatsapp');
