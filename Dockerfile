@@ -23,4 +23,12 @@ RUN chown -R www-data:www-data /var/www/html \
 # Update Apache config for Laravel
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
-EXPOSE 80
+# Replace hardcoded EXPOSE
+EXPOSE 10000
+
+# Set default Apache port using ENV
+ENV PORT=10000
+
+# Update Apache to use the dynamic PORT
+CMD /bin/bash -c "sed -i 's/Listen 80/Listen ${PORT}/' /etc/apache2/ports.conf && apache2-foreground"
+
