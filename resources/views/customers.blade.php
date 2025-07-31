@@ -149,7 +149,14 @@
             var table = $('#file-exports').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('customers') }}",
+                ajax: {
+                    url: "{{ route('customers') }}",
+                    type: "GET",
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                },
                 columns: [{
                         data: null,
                         render: function(data, type, row, meta) {
