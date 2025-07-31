@@ -240,7 +240,7 @@
             $(document).on('click', '#createBouquetBtn', function() {
                 const deliveryDate = $('input[name="delivery_date"]').val();
                 const today = new Date().toISOString().split('T')[
-                0]; // Get today's date in YYYY-MM-DD format
+                    0]; // Get today's date in YYYY-MM-DD format
                 // Check if the delivery date is valid
                 if (deliveryDate && deliveryDate < today) {
                     toastr.error('Delivery date must be today or a future date.');
@@ -351,7 +351,6 @@
 
             $(document).on('click', '.editBtn', function() {
                 const bouquetId = $(this).data('id'); // Get the bouquet ID from the button's data attribute
-
                 $.ajax({
                     url: "{{ route('bouquet.edit.modal') }}",
                     type: 'POST',
@@ -373,7 +372,7 @@
             $(document).on('click', '#updateBouquetBtn', function() {
                 let formData = new FormData();
                 formData.append('_token', '{{ csrf_token() }}');
-                formData.append('bouquet_id', $('#editBouquetModal').data('id'));
+                formData.append('bouquet_id', $('input[name="bouquet_id"]').val());
                 formData.append('edit_customer_name', $('input[name="edit_customer_name"]').val());
                 formData.append('edit_customer_email', $('input[name="edit_customer_email"]').val());
                 formData.append('edit_customer_phone', $('input[name="edit_customer_phone"]').val());

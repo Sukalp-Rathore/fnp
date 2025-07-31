@@ -238,6 +238,13 @@
                 $("#enterPurchaseModal").modal('show');
             });
 
+            $('#payment_mode').on('change', function() {
+                if ($(this).val() === 'none') {
+                    $('#payment_status').val('pending').trigger('change');
+                    $('#paid_amount').val(0); // Reset paid amount to 0 if payment mode is 'none'
+                }
+            });
+
             $('#purchaseForm').on('submit', function(e) {
                 e.preventDefault();
                 var form = $(this);

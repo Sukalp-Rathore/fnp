@@ -100,7 +100,6 @@ class BouquetController extends Controller
         $request->validate([
             'bouquet_id' => 'required|string',
         ]);
-    
         $bouquet = Bouquet::where('_id', $request->bouquet_id)->first();
         $inventory = Inventory::all(); // Fetch all inventory items
     
@@ -131,34 +130,40 @@ class BouquetController extends Controller
         if (!$bouquet) {
             return response()->json(['success' => false, 'message' => 'Bouquet not found']);
         }
-        // Restore previous items' quantities to inventory
-        foreach ($bouquet->items as $item) {
-            $inventoryItem = Inventory::where('product_name', $item['item_name'])->first();
-            if ($inventoryItem) {
-                $inventoryItem->quantity += $item['quantity'];
-                $inventoryItem->save();
-            }
-        }
-    
-        $totalPrice = 0;
-        $itemsArray = [];
-        // Update bouquet items and adjust inventory
-        foreach ($request->items as $item) {
-            $inventoryItem = Inventory::where('_id', $item['id'])->first();
-            if ($inventoryItem && $inventoryItem->quantity >= $item['quantity']) {
-                $totalPrice += $inventoryItem->selling_price * $item['quantity'];
-                $itemsArray[] = [
-                    'item_name' => $inventoryItem->product_name,
-                    'quantity' => $item['quantity'],
-                ];
-    
-                // Deduct the quantity from inventory
-                $inventoryItem->quantity -= $item['quantity'];
-                $inventoryItem->save();
-            } else {
-                return response()->json(['success' => false, 'message' => 'Insufficient stock for ' . $inventoryItem->product_name]);
-            }
-        }
+$oldQuantities = [];
+foreach ($bouquet->items as $item) {
+    $oldQuantities[$item['item_name']] = $item['quantity'];
+}
+
+$totalPrice = 0;
+$itemsArray = [];
+
+foreach ($request->items as $item) {
+    $inventoryItem = Inventory::where('_id', $item['id'])->first();
+    if (!$inventoryItem) {
+        return response()->json(['success' => false, 'message' => 'Inventory item not found']);
+    }
+
+    $oldQty = $oldQuantities[$inventoryItem->product_name] ?? 0;
+    $newQty = $item['quantity'];
+    $diff = $newQty - $oldQty;
+
+    // If increasing, check for stock
+    if ($diff > 0 && $inventoryItem->quantity < $diff) {
+        return response()->json(['success' => false, 'message' => 'Insufficient stock for ' . $inventoryItem->product_name]);
+    }
+
+    // Update inventory
+    $inventoryItem->quantity -= $diff; // This works for both increase and decrease
+    $inventoryItem->save();
+
+    $totalPrice += $inventoryItem->selling_price * $newQty;
+    $itemsArray[] = [
+        'item_name' => $inventoryItem->product_name,
+        'color' => $inventoryItem->color ?? null,
+        'quantity' => $newQty,
+    ];
+}
         // Update bouquet image if provided
         if ($request->hasFile('bouquet_image')) {
             $image = $request->file('bouquet_image');

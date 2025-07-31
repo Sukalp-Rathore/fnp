@@ -44,7 +44,8 @@
                             <input type="number" class="form-control edit-quantity"
                                 name="items[{{ $loop->index }}][quantity]" value="{{ $quantityInBouquet }}"
                                 min="0" max="{{ $item->quantity + $quantityInBouquet }}"
-                                data-id="{{ $item->_id }}" {{ $quantity <= 0 ? 'disabled' : '' }}>
+                                data-id="{{ $item->_id }}"
+                                {{ $quantity + $quantityInBouquet <= 0 ? 'disabled' : '' }}>
                             <input type="hidden" name="items[{{ $loop->index }}][id]" value="{{ $item->_id }}">
                         </td>
                     </tr>
@@ -61,6 +62,8 @@
                 value="{{ $bouquet->customer_email }}" placeholder="Customer Email">
             <input type="tel" maxlength="10" class="form-control mb-2" name="edit_customer_phone"
                 value="{{ $bouquet->customer_phone }}" placeholder="Customer Phone">
+            <input type="hidden" id="bouquet_id" name="bouquet_id" value="{{ $bouquet->_id }}"
+                class="form-control mb-2" placeholder="Bouquet ID">
         </div>
     </div>
     <div class="card mt-3">
