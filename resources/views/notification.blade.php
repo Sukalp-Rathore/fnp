@@ -108,7 +108,14 @@
             var table = $('#file-exports').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('mails') }}",
+                ajax: {
+                    url: "{{ route('mails') }}",
+                    type: "GET",
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                },
                 columns: [{
                         data: null,
                         render: function(data) {
