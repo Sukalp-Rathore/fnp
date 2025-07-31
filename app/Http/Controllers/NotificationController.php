@@ -85,7 +85,7 @@ class NotificationController extends Controller
             }
             // $customer->customer_email= "sukalprathore@gmail.com";
             // Dynamically reference the selected mail template from the Emails folder
-            $templatePath = 'emails.' . $request->mail_template;
+            $templatePath = 'Emails.' . $request->mail_template;
             Mail::send($templatePath, ['details' => $details], function ($message) use ($customer, $details, $subject) {
                 $message->to($customer->customer_email)
                         ->subject($subject);
