@@ -32,9 +32,17 @@ class SalesController extends Controller
             'online_sale' => $online_sales,
             'credit_sale' => $credit_sales,
             'total_sale' => $total_sale,
-            'month' => $currentMonth
+            'month' => $currentMonth,
+            'date' => $request->date
         ]);
         
         return response()->json(['success' => true, 'message' => 'Entry Successfull']);
+    }
+
+    public function deleteSale(Request $request)
+    {
+        $saleId = $request->input('saleId');
+        Sale::destroy($saleId);
+        return response()->json(['success' => true, 'message' => 'Sale deleted successfully']);
     }
 }

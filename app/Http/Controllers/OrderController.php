@@ -10,6 +10,8 @@ use App\Models\Customer;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SendMail;
 use Illuminate\Support\Facades\Http;
+use App\Models\FestivalEvent;
+
 class OrderController extends Controller
 {
     //
@@ -17,11 +19,25 @@ class OrderController extends Controller
     {
         // Logic to fetch all orders
         $orders = Order::get();
-        $e = CommonEvent::get();
-        $events = $e[0]->events;
+        // Fetch events from CommonEvent
+        $commonEvents = CommonEvent::first();
+        $events = $commonEvents ? $commonEvents->events : [];
+
+        // Fetch events from FestivalEvent
+        $festivalEvents = FestivalEvent::pluck('events')->flatten()->toArray();
+
+        // Merge both event arrays and remove duplicates
+        $allEvents = array_unique(array_merge($events, $festivalEvents));
+        // dd($allEvents);
 
         $vendors = Vendor::get();
-        return view('orders' , compact('orders','events','vendors'));
+
+        // Fetch all primary customers with their names and phone numbers
+        $primaryCustomers = Customer::where('customer_type', 'primary')
+            ->select('customer_name', 'customer_phone')
+            ->get();
+        // dd($primaryCustomers);
+        return view('orders' , compact('orders','allEvents','vendors','primaryCustomers'));
     }
 
     public function getVendorsByCity(Request $request)
@@ -43,7 +59,7 @@ class OrderController extends Controller
         $request->validate([
             'order_type' => 'required|in:primary,secondary',
             'customer_name_primary' => 'required|string|max:255',
-            'customer_email_primary' => 'required|email|max:255',
+            'customer_email_primary' => 'nullable|email|max:255',
             'customer_mobile_primary' => 'required|string|max:15',
             'customer_address' => 'required|string|max:500',
             'city' => 'required|string|max:255',
@@ -55,12 +71,26 @@ class OrderController extends Controller
             'customer_email_secondary' => 'nullable|email|max:255',
             'customer_mobile_secondary' => 'nullable|string|max:15',
             'vendor' => 'nullable|string',
+            'message' => 'nullable|string|max:500',
             'order_status' => 'pending',
             'created_by' => 'required|string|max:255',
         ]);
         // Create the order
         $request->merge(['order_status' => "pending"]);
 
+        // Generate next order_no
+        $lastOrder = Order::orderBy('created_at', 'desc')->first();
+        $lastNumber = 35349; // One less than starting point
+        if ($lastOrder && preg_match('/FNPIND - (\d+)/', $lastOrder->order_no, $matches)) {
+            $lastNumber = (int)$matches[1];
+        }
+        $nextOrderNo = 'FNPIND - ' . ($lastNumber + 1);
+
+        // Merge order_no into request data
+        $request->merge([
+            'order_status' => "pending",
+            'order_no' => $nextOrderNo,
+        ]);
         $order = Order::create($request->all());
     
         // Check if primary customer exists
@@ -119,25 +149,23 @@ class OrderController extends Controller
                     'body' => 'You have been assigned a new order. Here are the details:',
                     'name' => $vendor->first_name,
                     'order_details' => [
-                        'customer_name_primary' => $request->customer_name_primary,
-                        'customer_email_primary' => $request->customer_email_primary,
-                        'customer_mobile_primary' => $request->customer_mobile_primary,
                         'customer_address' => $request->customer_address,
                         'city' => $request->city,
                         'event_name' => $request->event_name,
                         'delivery_date' => $request->delivery_date,
                         'products' => $request->products,
                         'value' => $request->value,
-                        'sender_name' => $request->customer_name_secondary ?: 'N/A',
-                        'sender_email' => $request->customer_email_secondary ?: 'N/A',
-                        'sender_mobile' => $request->customer_mobile_secondary ?: 'N/A',
+                        'message' => $request->message,
+                        'customer_name' => $request->customer_name_secondary ?: 'N/A',
+                        'customer_email' => $request->customer_email_secondary ?: 'N/A',
+                        'customer_mobile' => $request->customer_mobile_secondary ?: 'N/A',
                     ],
                 ];
-                $vendor->email = "sukalprathore@gmail.com";
-                // Mail::send('Emails.vendor', ['details' => $details], function ($message) use ($vendor) {
-                //     $message->to($vendor->email)
-                //             ->subject('New Order Assigned - Flowers n Petals');
-                // });
+                //$vendor->email = "sukalprathore@gmail.com";
+                Mail::send('Emails.vendor', ['details' => $details], function ($message) use ($vendor) {
+                    $message->to($vendor->email)
+                            ->subject('New Order Assigned - Flowers n Petals');
+                });
 
                 $toAndComponents = [];
                 $phone = preg_replace('/\D/', '', $vendor->mobile); // Remove non-numeric characters
@@ -147,15 +175,15 @@ class OrderController extends Controller
                     "components" => [
                         "body_1" => [
                             "type" => "text",
-                            "value" => $request->customer_name_primary // Dynamically send customer_name
+                            "value" => $request->customer_name_secondary // Dynamically send customer_name
                         ],
                         "body_2" => [
                             "type" => "text",
-                            "value" => $request->customer_email_primary // Dynamically send customer_name
+                            "value" => $request->customer_email_secondary // Dynamically send customer_name
                         ],
                         "body_3" => [
                             "type" => "text",
-                            "value" => $request->customer_mobile_primary // Dynamically send customer_name
+                            "value" => $request->customer_mobile_secondary // Dynamically send customer_name
                         ],
                         "body_4" => [
                             "type" => "text",
@@ -175,7 +203,7 @@ class OrderController extends Controller
                         ],
                         "body_8" => [
                             "type" => "text",
-                            "value" => $request->sender_name // Dynamically send customer_name
+                            "value" => $request->message // Dynamically send message
                         ]
                     ]
                 ];
@@ -211,6 +239,7 @@ class OrderController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Order created successfully.',
+            'order' => $order,
         ]);
     }
 

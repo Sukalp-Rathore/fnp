@@ -23,6 +23,7 @@
                             <thead>
                                 <tr>
                                     <th>S.No</th>
+                                    <th>Order No</th>
                                     <th>Order Date</th>
                                     <th>Created By</th>
                                     <th>Primary Customer</th>
@@ -45,6 +46,7 @@
                                 @foreach ($orders as $o)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $o->order_no }}</td>
                                         <td>{{ getutc($o->created_at, 'd.m.Y') }}</td>
                                         <td>{{ $o->created_by }}</td>
                                         <td>{{ $o->customer_name_primary }}</td>
@@ -71,6 +73,8 @@
                                                 <button class="btn btn-success markDelivered"
                                                     data-id="{{ $o->_id }}">Mark Delivered</button>
                                             @endif
+                                            <button class="btn btn-secondary printOrderBtn"
+                                                data-order='@json($o)'>Print</button>
                                             {{-- <button class="btn btn-secondary editBtn">Edit</button> --}}
                                         </td>
                                     </tr>
@@ -108,13 +112,19 @@
                         <div id="primaryOrderFields">
                             <div class="mb-3">
                                 <label for="customerNamePrimary" class="form-label">Customer Name (Primary)</label>
-                                <input type="text" class="form-control" id="customerNamePrimary"
-                                    name="customer_name_primary" required autocomplete="off">
+                                <select class="form-select" id="customerNamePrimary" name="customer_name_primary" required>
+                                    <option value="" selected>Select Customer</option>
+                                    @foreach ($primaryCustomers as $customer)
+                                        <option value="{{ $customer->customer_name }}"
+                                            data-phone="{{ $customer->customer_phone }}">{{ $customer->customer_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="mb-3">
                                 <label for="customerEmailPrimary" class="form-label">Customer Email (Primary)</label>
                                 <input type="email" class="form-control" id="customerEmailPrimary"
-                                    name="customer_email_primary" required autocomplete="off">
+                                    name="customer_email_primary" autocomplete="off">
                             </div>
                             <div class="mb-3">
                                 <label for="customerMobilePrimary" class="form-label">Customer Mobile (Primary)</label>
@@ -134,7 +144,7 @@
                                 <label for="eventName" class="form-label">Event Name</label>
                                 <select class="form-select" id="eventName" name="event_name" required autocomplete="off">
                                     <option value="" selected>Select Event</option>
-                                    @foreach ($events as $event)
+                                    @foreach ($allEvents as $event)
                                         <option value="{{ $event }}">{{ $event }}</option>
                                     @endforeach
                                 </select>
@@ -161,6 +171,10 @@
                             <div class="mb-3">
                                 <label for="vendorCheckbox" class="form-label">Select Vendor?</label>
                                 <input type="checkbox" id="vendorCheckbox" name="vendor_checkbox">
+                            </div>
+                            <div class="mb-3">
+                                <label for="vendorMessage">Message</label>
+                                <textarea id="vendorMessage" name="message" class="form-control" rows="3"></textarea>
                             </div>
                             <div id="vendorSelection" class="mb-3" style="display: none;">
                                 <label for="vendor" class="form-label">Vendor</label>
@@ -199,6 +213,83 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- filepath: /Applications/XAMPP/xamppfiles/htdocs/fnp/resources/views/orders.blade.php -->
+    <div class="modal fade" id="orderReceiptModal" tabindex="-1" aria-labelledby="orderReceiptModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header justify-content-center">
+                    <img src="assets/images/brand-logos/fnp-logo.jpeg" alt="Logo" style="height:80px;">
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered align-middle">
+                        <tbody>
+                            <tr>
+                                <td><strong>Area</strong></td>
+                                <td>
+                                    <input type="text" class="form-control" id="receiptArea" autocomplete="off" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Order No</strong></td>
+                                <td><span id="receiptOrderNo"></span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Date</strong></td>
+                                <td><span id="receiptDate"></span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Delivery Time Slot</strong></td>
+                                <td>
+                                    <input type="text" class="form-control" id="receiptDeliverySlot"
+                                        autocomplete="off" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Recipient Name</strong></td>
+                                <td>
+                                    <input type="text" class="form-control" id="receiptRecipientName"
+                                        autocomplete="off" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Recipient Address</strong></td>
+                                <td>
+                                    <input type="text" class="form-control" id="receiptRecipientAddress"
+                                        autocomplete="off" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Recipient Number</strong></td>
+                                <td>
+                                    <input type="text" class="form-control" id="receiptRecipientNumber"
+                                        autocomplete="off" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Products</strong></td>
+                                <td>
+                                    <input type="text" class="form-control" id="receiptProducts"
+                                        autocomplete="off" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <textarea class="form-control" id="receiptMessage"></textarea>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    {{-- Add this inside your modal, outside the table --}}
+                    <div id="orderReceiptPrintArea" style="display:none;"></div>
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-primary" id="printOrderReceiptBtn">Print</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -243,6 +334,19 @@
 
             $(document).on('click', '.add-order', function() {
                 $("#addOrderModal").modal('show');
+            });
+
+            $.fn.modal.Constructor.prototype.enforceFocus = function() {};
+
+            $('#customerNamePrimary').select2({
+                dir: "ltr",
+                tags: true,
+                dropdownParent: $('#customerNamePrimary').closest('.modal-content')
+            });
+
+            $('#customerNamePrimary').on('change', function() {
+                var phone = $(this).find(':selected').data('phone') || '';
+                $('#customerMobilePrimary').val(phone);
             });
 
             // Fetch vendors when the city input changes
@@ -302,6 +406,24 @@
                 }
             });
 
+            $(document).on('click', '.printOrderBtn', function() {
+                const order = $(this).data('order');
+
+                $('#receiptArea').val('');
+                $('#receiptOrderNo').text(order.order_no || '');
+                $('#receiptDate').text(order.event_date || '');
+                $('#receiptDeliverySlot').val(order.delivery_time_slot || '');
+                $('#receiptRecipientName').val(order.customer_name_secondary || order
+                    .customer_name_primary || '');
+                $('#receiptRecipientAddress').val(order.customer_address || '');
+                $('#receiptRecipientNumber').val(order.customer_mobile_secondary || order
+                    .customer_mobile_primary || '');
+                $('#receiptProducts').val(order.products || '');
+                $('#receiptMessage').val(order.message || '');
+
+                $('#orderReceiptModal').modal('show');
+            });
+
             // Handle form submission
             $('#createOrderForm').on('submit', function(e) {
                 e.preventDefault();
@@ -315,7 +437,23 @@
                         if (response.success) {
                             toastr.success(response.message);
                             $('#createOrderModal').modal('hide');
-                            location.reload();
+                            // Assuming you get the order data in response.order
+                            const order = response
+                                .order; // You may need to return order data from backend
+
+                            $('#receiptArea').val('');
+                            $('#receiptOrderNo').text(order.order_no || '');
+                            $('#receiptDate').text(order.event_date || '');
+                            $('#receiptDeliverySlot').val(order.delivery_time_slot || '');
+                            $('#receiptRecipientName').val(order.customer_name_secondary ||
+                                order.customer_name_primary || '');
+                            $('#receiptRecipientAddress').val(order.customer_address || '');
+                            $('#receiptRecipientNumber').val(order.customer_mobile_secondary ||
+                                order.customer_mobile_primary || '');
+                            $('#receiptProducts').val(order.products || '');
+                            $('#receiptMessage').val(order.message || '');
+
+                            $('#orderReceiptModal').modal('show');
                         } else {
                             toastr.error(response.message);
                         }
@@ -324,6 +462,46 @@
                         toastr.error('An error occurred while creating the order.');
                     }
                 });
+            });
+
+            $('#printOrderReceiptBtn').on('click', function() {
+                // Build print HTML with actual values
+                var html = `
+                    <div class="text-center mb-3">
+                        <img src="assets/images/brand-logos/fnp-logo.jpeg" alt="Logo" style="height:80px;">
+                    </div>
+                    <table class="table table-bordered align-middle">
+                        <tbody>
+                            <tr><td><strong>Area</strong></td><td>${$('#receiptArea').val()}</td></tr>
+                            <tr><td><strong>Order No</strong></td><td>${$('#receiptOrderNo').text()}</td></tr>
+                            <tr><td><strong>Date</strong></td><td>${$('#receiptDate').text()}</td></tr>
+                            <tr><td><strong>Delivery Time Slot</strong></td><td>${$('#receiptDeliverySlot').val()}</td></tr>
+                            <tr><td><strong>Recipient Name</strong></td><td>${$('#receiptRecipientName').val()}</td></tr>
+                            <tr><td><strong>Recipient Address</strong></td><td>${$('#receiptRecipientAddress').val()}</td></tr>
+                            <tr><td><strong>Recipient Number</strong></td><td>${$('#receiptRecipientNumber').val()}</td></tr>
+                            <tr><td><strong>Products</strong></td><td>${$('#receiptProducts').val()}</td></tr>
+                            <tr><td colspan="2">${$('#receiptMessage').val()}</td></tr>
+                        </tbody>
+                    </table>
+                `;
+                $('#orderReceiptPrintArea').html(html);
+
+                // Print only the print area
+                var printContents = $('#orderReceiptPrintArea').html();
+                var printWindow = window.open('', '', 'height=700,width=900');
+                printWindow.document.write('<html><head><title>Order Receipt</title>');
+                printWindow.document.write(
+                    '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">'
+                );
+                printWindow.document.write('</head><body>');
+                printWindow.document.write(printContents);
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                printWindow.focus();
+                setTimeout(function() {
+                    printWindow.print();
+                    printWindow.close();
+                }, 500);
             });
 
             $(document).on('click', '.markDelivered', function() {

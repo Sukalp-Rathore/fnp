@@ -259,6 +259,13 @@
                             </a>
                         </li>
                         <li class="slide">
+                            <a href="{{ route('customers.list') }}"
+                                class="side-menu__item  {{ url()->current() == route('customers.list') ? 'active' : '' }}">
+                                <i class="bi bi-person-gear w-7 h-7 side-menu__icon"></i>
+                                <span class="side-menu__label">List Customers</span>
+                            </a>
+                        </li>
+                        <li class="slide">
                             <a href="{{ route('vendors') }}"
                                 class="side-menu__item  {{ url()->current() == route('vendors') ? 'active' : '' }}">
                                 <i class="bi bi-shop w-7 h-7 side-menu__icon"></i>

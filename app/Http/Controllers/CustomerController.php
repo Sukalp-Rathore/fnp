@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\CommonEvent;
 use Illuminate\Pagination\Paginator;
+use App\Models\FestivalEvent;
 class CustomerController extends Controller
 {
     //
@@ -55,10 +56,19 @@ class CustomerController extends Controller
         }
     
         // Initial load
-        $e = CommonEvent::get();
-        $events = $e[0]->events ?? [];
-    
-        return view('customers', compact('events'));
+        // Fetch events from CommonEvent
+        $commonEvents = CommonEvent::first();
+        $events = $commonEvents ? $commonEvents->events : [];
+
+        // Fetch events from FestivalEvent
+        $festivalEvents = FestivalEvent::pluck('events')->flatten()->toArray();
+
+        // Merge both event arrays and remove duplicates
+        $allEvents = array_unique(array_merge($events, $festivalEvents));
+        // dd($allEvents);
+        // Fetch all primary customers and pluck their names
+        $primaryCustomerNames = Customer::where('customer_type', 'primary')->pluck('customer_name')->toArray();
+        return view('customers', compact('allEvents', 'primaryCustomerNames'));
     }
     
 
@@ -69,11 +79,12 @@ class CustomerController extends Controller
             'customer_email' => 'nullable|email|max:255',
             'customer_phone' => 'nullable|string|max:15',
             'customer_address' => 'nullable|string|max:500',
-            'customer_type' => 'required|in:Primary,Secondary',
+            'customer_type' => 'required|in:primary,secondary',
+            'event_name' => 'nullable|string|max:255',
             'primary_customer_name' => 'nullable|string|max:255',
         ]);
-    
-        if ($request->customer_type === 'Secondary') {
+
+        if ($request->customer_type === 'secondary') {
             // Check if the primary customer exists
             $primaryCustomer = Customer::where('customer_name', $request->primary_customer_name)->first();
     
@@ -83,6 +94,9 @@ class CustomerController extends Controller
                     'customer_name' => $request->customer_name,
                     'customer_email' => $request->customer_email,
                     'customer_phone' => $request->customer_phone,
+                    'event_name' => $request->event_name,
+                    'event_date' => $request->event_date,
+                    'customer_type' => 'secondary',
                     'customer_address' => $request->customer_address,
                 ];
     
@@ -103,7 +117,9 @@ class CustomerController extends Controller
                     'customer_email' => $request->customer_email,
                     'customer_phone' => $request->customer_phone,
                     'customer_address' => $request->customer_address,
-                    'customer_type' => 'Secondary',
+                    'customer_type' => 'secondary',
+                    'event_name' => $request->event_name,
+                    'event_date' => $request->event_date,
                 ]);
     
                 return response()->json([
@@ -129,9 +145,17 @@ class CustomerController extends Controller
         ]);
         $customerId = $request->input('customerId');
         $customer = Customer::where('_id', $customerId)->first();
-        $e = CommonEvent::get();
-        $events = $e[0]->events ?? [];
-        return view('edit-customer', compact('customer','events'));
+        $// Fetch events from CommonEvent
+    $commonEvents = CommonEvent::first();
+    $events = $commonEvents ? $commonEvents->events : [];
+
+    // Fetch events from FestivalEvent
+    $festivalEvents = FestivalEvent::pluck('events')->flatten()->toArray();
+
+    // Merge both event arrays and remove duplicates
+    $allEvents = array_unique(array_merge($events, $festivalEvents));
+    // dd($allEvents);
+        return view('edit-customer', compact('customer','allEvents'));
     }
 
     public function updateCustomer(Request $request)
@@ -143,7 +167,7 @@ class CustomerController extends Controller
             'customer_phone' => 'nullable',
             'customer_address' => 'nullable|string',
             'customer_type' => 'nullable|string',
-            'customer_event' => 'nullable|string',
+            'event_name' => 'nullable|string',
         ]);
         $customerId = $request->input('customerId');
         $customer = Customer::where('_id', $customerId)->first();
@@ -152,7 +176,7 @@ class CustomerController extends Controller
         $customer->customer_phone = $request->input('customer_phone');
         $customer->customer_address = $request->input('customer_address');
         $customer->customer_type = $request->input('customer_type');
-        $customer->customer_event = $request->input('customer_event');
+        $customer->event_name = $request->input('event_name');
         $customer->save();
         return response()->json(['success' => true, 'message' => 'Customer updated successfully']);
     }
@@ -170,5 +194,25 @@ class CustomerController extends Controller
         } else {
             return response()->json(['success' => false, 'message' => 'Customer not found']);
         }
+    }
+
+    public function primaryCustomers()
+    {
+        // Fetch all primary customers
+        $customers = Customer::where('customer_type', 'primary')->get();
+        return view('customer-list', compact('customers'));
+    }
+
+    public function getSecondaryCustomers(Request $request)
+    {
+        $request->validate([
+            'customerId' => 'required',
+        ]);
+        $customer = Customer::find($request->customerId);
+        if (!$customer || empty($customer->secondary_customers)) {
+            return response()->json(['success' => false, 'message' => 'No secondary customers found for this primary customer.']);
+        }
+        $secondaryCustomers = $customer->secondary_customers;
+        return view('show-secondary', compact('secondaryCustomers'));
     }
 }

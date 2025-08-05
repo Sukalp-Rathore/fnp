@@ -1,5 +1,7 @@
 @extends('layout')
 @section('content')
+    <!-- jQuery Confirm CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.min.css">
     <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
         <div>
             <h1 class="page-title fw-medium fs-18 mb-0">Sales</h1>
@@ -12,7 +14,7 @@
                 <div class="card-header justify-content-between">
                     <div class="card-title">All Sales</div>
                     <div class="card-options">
-                        <a class="btn btn-primary btn-sm openForm">Enter Today's Sales</a>
+                        <a class="btn btn-primary btn-sm openForm">Enter Sales</a>
                     </div>
                 </div>
                 <div class="card-body">
@@ -25,6 +27,7 @@
                                     <th>Online Sales(Rs)</th>
                                     <th>Credit Sales(Rs)</th>
                                     <th>Date</th>
+                                    <th>Options</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -34,7 +37,11 @@
                                         <td>{{ $v->cash_sale }}</td>
                                         <td>{{ $v->online_sale }}</td>
                                         <td>{{ $v->credit_sale }}</td>
-                                        <td>{{ getutc($v->created_at, 'd.m.Y') ?? 'N/A' }}</td>
+                                        <td>{{ getutc($v->date, 'd.m.Y') ?? 'N/A' }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger deleteBtn"
+                                                data-id="{{ $v->_id }}">Delete</button>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -75,6 +82,10 @@
                                 <input type="number" class="form-control" id="onlinesales" name="onlinesales"
                                     placeholder="Online Sales" autocomplete="off" required>
                             </div>
+                            <div class="col-xl-12 form-group">
+                                <label for="date" class="form-label text-default">Date</label>
+                                <input type="date" class="form-control" id="date" name="date" required>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -89,6 +100,8 @@
     {{-- end modal  --}}
 @endsection
 @section('js')
+    <!-- jQuery Confirm JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/js/jquery-confirm.min.js"></script>
     <script>
         $(document).ready(function() {
             var table = $('#file-exportt').DataTable({
@@ -148,6 +161,57 @@
                     }
                 });
             });
+
+            $(document).on('click', '.deleteBtn', function() {
+                let saleId = $(this).attr('data-id');
+
+                $.confirm({
+                    title: 'Confirm Deletion',
+                    content: 'Are you sure you want to delete this sale?',
+                    buttons: {
+                        confirm: {
+                            text: 'Yes, Delete',
+                            btnClass: 'btn-red',
+                            action: function() {
+                                $.ajax({
+                                    url: "{{ route('sale.delete') }}",
+                                    type: 'POST',
+                                    data: {
+                                        saleId: saleId,
+                                        _token: '{{ csrf_token() }}' // add CSRF token manually if needed
+                                    },
+                                    success: function(response) {
+                                        if (response.success == false) {
+                                            $.alert({
+                                                title: 'Error',
+                                                content: response.message,
+                                                type: 'red'
+                                            });
+                                        } else {
+                                            toastr.success(response.message);
+                                            setTimeout(function() {
+                                                window.location.reload();
+                                            }, 1000);
+                                        }
+                                    },
+                                    error: function(xhr, status, error) {
+                                        console.error(xhr.responseText);
+                                        $.alert({
+                                            title: 'Ajax Error',
+                                            content: 'Something went wrong while deleting.',
+                                            type: 'red'
+                                        });
+                                    }
+                                });
+                            }
+                        },
+                        cancel: function() {
+                            // Do nothing on cancel
+                        }
+                    }
+                });
+            });
+
         });
     </script>
 @endsection

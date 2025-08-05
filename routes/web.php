@@ -27,7 +27,9 @@ Route::middleware(['web' ,'auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
     Route::get('/mails', [NotificationController::class, 'index'])->name('mails');
     Route::post('/send-mail', [NotificationController::class, 'sendMail'])->name('send.mail');
+    Route::post('/send-mail-primary', [NotificationController::class, 'sendMailPrimary'])->name('send.mail.primary');
     Route::post('/send-whatsapp', [NotificationController::class, 'sendWhatsapp'])->name('send.whatsapp');
+    Route::post('/send-whatsapp-primary', [NotificationController::class, 'sendWhatsappPrimary'])->name('send.whatsapp.primary');
     Route::post('/send-sms', [NotificationController::class, 'sendSms'])->name('send.sms');
     Route::get('/mail-test',[NotificationController::class, 'testMail'])->name('mail.test');
     Route::get('/customers', [CustomerController::class, 'customers'])->name('customers');
@@ -35,6 +37,8 @@ Route::middleware(['web' ,'auth'])->group(function () {
     Route::post('/show-edit-customer', [CustomerController::class, 'showEditCustomer'])->name('customer.show.edit');
     Route::post('/update-customer', [CustomerController::class, 'updateCustomer'])->name('customer.update');
     Route::post('/delete-customer', [CustomerController::class, 'deleteCustomer'])->name('customer.delete');
+    Route::get('/customers-list', [CustomerController::class, 'primaryCustomers'])->name('customers.list');
+    Route::post('/customers-secondary', [CustomerController::class, 'getSecondaryCustomers'])->name('customers.secondary');
     Route::get('/vendors', [VendorController::class, 'vendors'])->name('vendors');
     Route::post('/vendor-orders', [VendorController::class, 'getVendorOrders'])->name('vendor.orders');
     Route::post('/add-vendor', [VendorController::class, 'createVendor'])->name('vendor.create');
@@ -62,8 +66,13 @@ Route::middleware(['web' ,'auth'])->group(function () {
     Route::post('/order-mark-delivered', [OrderController::class, 'markDelivered'])->name('order.mark.delivered');
     Route::get('/sales', [SalesController::class, 'sales'])->name('sales');
     Route::post('/sales-enter', [SalesController::class ,'enterSales'])->name('sales.enter');
+    Route::post('/sale-delete', [SalesController::class, 'deleteSale'])->name('sale.delete');
     Route::get('/purchase', [PurchaseController::class, 'purchase'])->name('purchase');
+    Route::post('/purchase/vendor-purchases', [PurchaseController::class, 'getVendorPurchases'])->name('purchase.vendor.purchases');
     Route::post('/purchase-enter', [PurchaseController::class ,'enterPurchase'])->name('purchase.enter');
+    Route::post('/purchase-show-edit', [PurchaseController::class, 'showEditPurchase'])->name('purchase.show.edit');
+    Route::post('/purchase-update', [PurchaseController::class, 'updatePurchase'])->name('purchase.update');
+    Route::post('/purchase-delete', [PurchaseController::class, 'deletePurchase'])->name('purchase.delete');
     Route::get('/purchase-vendors', [PurchaseController::class, 'index'])->name('purchase-vendors.index');
     Route::post('/purchase-vendors/add', [PurchaseController::class, 'store'])->name('purchase-vendors.store');
     Route::post('/purchase-vendors/edit', [PurchaseController::class, 'update'])->name('purchase-vendors.update');

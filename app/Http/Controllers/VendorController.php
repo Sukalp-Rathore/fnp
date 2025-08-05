@@ -79,7 +79,7 @@ class VendorController extends Controller
         $request->validate([
             'vendorId' => 'required',
             'first_name' => 'required',
-            'email' => 'nullable|email',
+            'email' => 'required|email',
             'mobile' => 'nullable',
             'alternate_mobile' => 'nullable',
             'city' => 'nullable',

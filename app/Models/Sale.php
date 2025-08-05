@@ -15,6 +15,7 @@ class Sale extends Model
         'credit_sale',
         'total_sale',
         'month',
-        'created_at'
+        'created_at',
+        'date'
     ];
 }

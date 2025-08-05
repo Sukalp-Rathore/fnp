@@ -37,7 +37,7 @@
     <div class="mb-3">
         <label for="event_name" class="form-label">Choose event</label>
         <select class="form-select" id="event_name" name="event_name">
-            @foreach ($events as $event)
+            @foreach ($allEvents as $event)
                 <option value="{{ $event }}"
                     {{ isset($customer) && strtolower($customer->event_name) == strtolower($event) ? 'selected' : '' }}>
                     {{ $event }}</option>

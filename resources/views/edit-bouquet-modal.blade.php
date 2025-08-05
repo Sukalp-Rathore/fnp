@@ -54,6 +54,21 @@
         </table>
     </div>
     <div class="card mt-3">
+        <div class="card-header">Making Charge</div>
+        <div class="card-body">
+            <input type="text" class="form-control mb-2" name="making_charge_edit"
+                value="{{ $bouquet->making_charge }}" placeholder="Making Charge" autocomplete="off">
+        </div>
+    </div>
+    <div class="card mt-3">
+        <div class="card-header">Created By</div>
+        <div class="card-body">
+            <input type="text" class="form-control mb-2" name="created_by_edit"
+                placeholder="Person Name (Who created this bouquet)" value="{{ $bouquet->created_by }}"
+                autocomplete="off">
+        </div>
+    </div>
+    <div class="card mt-3">
         <div class="card-header">Customer Details</div>
         <div class="card-body">
             <input type="text" class="form-control mb-2" name="edit_customer_name"
@@ -138,6 +153,51 @@
                 };
                 reader.readAsDataURL(file);
             }
+        });
+
+        $(document).on('click', '#updateBouquetBtn', function() {
+            let formData = new FormData();
+            formData.append('_token', '{{ csrf_token() }}');
+            formData.append('bouquet_id', $('input[name="bouquet_id"]').val());
+            formData.append('making_charge_edit', $('input[name="making_charge_edit"]').val());
+            formData.append('created_by_edit', $('input[name="created_by_edit"]').val());
+            formData.append('edit_customer_name', $('input[name="edit_customer_name"]').val());
+            formData.append('edit_customer_email', $('input[name="edit_customer_email"]').val());
+            formData.append('edit_customer_phone', $('input[name="edit_customer_phone"]').val());
+            formData.append('edit_delivery_date', $('input[name="edit_delivery_date"]').val());
+            formData.append('edit_delivery_address', $('textarea[name="edit_delivery_address"]').val());
+
+            // Collect items as an array
+            var table = $('#datatable-basic').DataTable();
+            table.$('.edit-quantity').each(function(index) {
+                const id = $(this).data('id');
+                const quantity = $(this).val();
+                if (quantity > 0) {
+                    formData.append(`items[${index}][id]`, id); // Append item ID
+                    formData.append(`items[${index}][quantity]`,
+                    quantity); // Append item quantity
+                }
+            });
+
+            $.ajax({
+                url: "{{ route('bouquet.update') }}",
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        $('#editBouquetModal').modal('hide');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        toastr.error(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error('Failed to update bouquet.');
+                }
+            });
         });
     });
 </script>

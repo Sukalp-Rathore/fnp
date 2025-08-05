@@ -28,6 +28,8 @@ class BouquetController extends Controller
             'items' => 'required|array',
             'items.*.id' => 'required|string', // Validate each item's ID
             'items.*.quantity' => 'required|integer|min:1', // Validate each item's quantity
+            'created_by' => 'required|string|max:255',
+            'making_charge' => 'nullable|numeric|min:0', // Validate making charge
             'bouquet_image' => 'required|image|max:2048', // Max 2MB
             'customer_name' => 'nullable|string|max:255',
             'customer_email' => 'nullable|email|max:255',
@@ -64,13 +66,14 @@ class BouquetController extends Controller
         // Create the bouquet
         Bouquet::create([
             'items' => $itemsArray,
-            'total_price' => $totalPrice,
+            'total_price' => $totalPrice + (int)$request->making_charge, // Add making charge to total price
             'customer_name' => $request->customer_name,
             'customer_email' => $request->customer_email,
             'customer_phone' => $request->customer_phone,
             'delivery_date' => setutc($request->delivery_date),
             'delivery_address' => $request->delivery_address,
             'created_by' => $request->created_by,
+            'making_charge' => $request->making_charge,
             'bouquet_image' => 'data:' . $image->getMimeType() . ';base64,' . $base64Image,
         ]);
     
@@ -112,11 +115,14 @@ class BouquetController extends Controller
 
     public function updateBouquet(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'bouquet_id' => 'required|string',
             'items' => 'required|array',
             'items.*.id' => 'required|string', // Validate each item's ID
             'items.*.quantity' => 'required|integer|min:0', // Validate each item's quantity
+            'created_by_edit' => 'required|string|max:255',
+            'making_charge_edit' => 'nullable|numeric|min:0', // Validate making charge
             'bouquet_image' => 'nullable|image|max:2048', // Max 2MB
             'edit_customer_name' => 'nullable|string|max:255',
             'edit_customer_email' => 'nullable|email|max:255',
@@ -130,40 +136,40 @@ class BouquetController extends Controller
         if (!$bouquet) {
             return response()->json(['success' => false, 'message' => 'Bouquet not found']);
         }
-$oldQuantities = [];
-foreach ($bouquet->items as $item) {
-    $oldQuantities[$item['item_name']] = $item['quantity'];
-}
+        $oldQuantities = [];
+        foreach ($bouquet->items as $item) {
+            $oldQuantities[$item['item_name']] = $item['quantity'];
+        }
 
-$totalPrice = 0;
-$itemsArray = [];
+        $totalPrice = 0;
+        $itemsArray = [];
 
-foreach ($request->items as $item) {
-    $inventoryItem = Inventory::where('_id', $item['id'])->first();
-    if (!$inventoryItem) {
-        return response()->json(['success' => false, 'message' => 'Inventory item not found']);
-    }
+        foreach ($request->items as $item) {
+            $inventoryItem = Inventory::where('_id', $item['id'])->first();
+            if (!$inventoryItem) {
+                return response()->json(['success' => false, 'message' => 'Inventory item not found']);
+            }
 
-    $oldQty = $oldQuantities[$inventoryItem->product_name] ?? 0;
-    $newQty = $item['quantity'];
-    $diff = $newQty - $oldQty;
+            $oldQty = $oldQuantities[$inventoryItem->product_name] ?? 0;
+            $newQty = $item['quantity'];
+            $diff = $newQty - $oldQty;
 
-    // If increasing, check for stock
-    if ($diff > 0 && $inventoryItem->quantity < $diff) {
-        return response()->json(['success' => false, 'message' => 'Insufficient stock for ' . $inventoryItem->product_name]);
-    }
+            // If increasing, check for stock
+            if ($diff > 0 && $inventoryItem->quantity < $diff) {
+                return response()->json(['success' => false, 'message' => 'Insufficient stock for ' . $inventoryItem->product_name]);
+            }
 
-    // Update inventory
-    $inventoryItem->quantity -= $diff; // This works for both increase and decrease
-    $inventoryItem->save();
+            // Update inventory
+            $inventoryItem->quantity -= $diff; // This works for both increase and decrease
+            $inventoryItem->save();
 
-    $totalPrice += $inventoryItem->selling_price * $newQty;
-    $itemsArray[] = [
-        'item_name' => $inventoryItem->product_name,
-        'color' => $inventoryItem->color ?? null,
-        'quantity' => $newQty,
-    ];
-}
+            $totalPrice += $inventoryItem->selling_price * $newQty;
+            $itemsArray[] = [
+                'item_name' => $inventoryItem->product_name,
+                'color' => $inventoryItem->color ?? null,
+                'quantity' => $newQty,
+            ];
+        }
         // Update bouquet image if provided
         if ($request->hasFile('bouquet_image')) {
             $image = $request->file('bouquet_image');
@@ -173,7 +179,9 @@ foreach ($request->items as $item) {
     
         // Update bouquet details
         $bouquet->items = $itemsArray;
-        $bouquet->total_price = $totalPrice;
+        $bouquet->total_price = $totalPrice + (int)$request->making_charge_edit; // Add making charge to total price
+        $bouquet->created_by = $request->created_by_edit;
+        $bouquet->making_charge = $request->making_charge_edit ?? 0; // Use provided making charge or default to 0
         $bouquet->customer_name = $request->edit_customer_name;
         $bouquet->customer_email = $request->edit_customer_email;
         $bouquet->customer_phone = $request->edit_customer_phone;
@@ -211,6 +219,7 @@ foreach ($request->items as $item) {
         return response()->json([
             'success' => true,
             'items' => $items,
+            'bouquet_image' => $bouquet->bouquet_image, // Use the bouquet image stored in the bouquet
             'total_price' => $bouquet->total_price, // Use the total price stored in the bouquet
         ]);
     }

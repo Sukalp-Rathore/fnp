@@ -29,6 +29,8 @@ class Order extends Model
         "order_status",
         "order_type",
         "order_price",
+        "message",
+        "order_no",
         "created_by"
     ];
 }

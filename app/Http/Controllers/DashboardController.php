@@ -48,7 +48,7 @@ class DashboardController extends Controller
         // Fetch customers whose event_date is within the next 15 days
         // Fetch customers whose event_date is within the next 15 days
         $today = Carbon::now();
-        $endDate = $today->copy()->addDays(15);
+        $endDate = $today->copy()->addDays(3);
 
         // Get all customers
         $customerst = Customer::whereNotNull('event_date')->get();
@@ -60,6 +60,32 @@ class DashboardController extends Controller
             return $event->between($today, $endDate);
         });
 
+        $primaryWithUpcomingSecondary = Customer::where('customer_type', 'primary')
+        ->whereNotNull('secondary_customers')
+        ->get()
+        ->flatMap(function ($primary) use ($today, $endDate) {
+            if (is_array($primary->secondary_customers) && count($primary->secondary_customers)) {
+                return collect($primary->secondary_customers)->filter(function ($secondary) use ($today, $endDate) {
+                    if (!empty($secondary['event_date'])) {
+                        $eventDate = Carbon::parse($secondary['event_date'])->setYear($today->year);
+                        return $eventDate->between($today, $endDate);
+                    }
+                    return false;
+                })->map(function ($secondary) use ($primary) {
+                    return [
+                        'primary_id' => $primary->_id,
+                        'primary_name' => $primary->customer_name,
+                        'primary_email' => $primary->customer_email,
+                        'primary_phone' => $primary->customer_phone,
+                        'secondary_name' => $secondary['customer_name'] ?? '',
+                        'event_name' => $secondary['event_name'] ?? '',
+                        'event_date' => $secondary['event_date'] ?? '',
+                    ];
+                });
+            }
+            return [];
+        });
+        // dd($primaryWithUpcomingSecondary);
         
         // Check if the user selected "This Month"
         $filterByThisMonth = $request->input('filter_by_this_month', false);
@@ -134,7 +160,8 @@ class DashboardController extends Controller
             'topVendors',
             'filterByThisMonth',
             'customers',
-            'customersUp'
+            'customersUp',
+            'primaryWithUpcomingSecondary'
         ));
     }
 }

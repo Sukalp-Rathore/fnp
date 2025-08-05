@@ -1,5 +1,10 @@
 @extends('layout')
 @section('content')
+    <style>
+        input[type="checkbox"] {
+            border: 1px solid black !important;
+        }
+    </style>
     <!-- jQuery Confirm CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.min.css">
 
@@ -77,19 +82,23 @@
                         <div class="mb-3">
                             <label for="customer_type" class="form-label">Customer Type</label>
                             <select class="form-select" id="customer_type" name="customer_type">
-                                <option value="Primary">Primary</option>
-                                <option value="Secondary">Secondary</option>
+                                <option value="primary">Primary</option>
+                                <option value="secondary">Secondary</option>
                             </select>
                         </div>
                         <div class="mb-3" id="primaryCustomerField" style="display: none;">
                             <label for="primary_customer_name" class="form-label">Primary Customer Name</label>
-                            <input type="text" class="form-control" id="primary_customer_name"
-                                name="primary_customer_name" placeholder="Enter primary customer name" autocomplete="off">
+                            <select name="primary_customer_name" id="sss" class="form-select">
+                                <option value="">Select Primary Customer</option>
+                                @foreach ($primaryCustomerNames as $name)
+                                    <option value="{{ $name }}">{{ $name }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label for="event_name" class="form-label">Choose event</label>
                             <select class="form-select" id="event_name" name="event_name">
-                                @foreach ($events as $event)
+                                @foreach ($allEvents as $event)
                                     <option value="{{ $event }}">{{ $event }}</option>
                                 @endforeach
                                 <option value="">None</option>
@@ -135,15 +144,20 @@
 @section('js')
     <!-- jQuery Confirm JS -->
     <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/js/jquery-confirm.min.js"></script>
-
+    <script></script>
     <script>
         $(document).ready(function() {
             $('#customer_type').on('change', function() {
-                if ($(this).val() === 'Secondary') {
+                if ($(this).val() === 'secondary') {
                     $('#primaryCustomerField').show();
                 } else {
                     $('#primaryCustomerField').hide();
                 }
+            });
+            $.fn.modal.Constructor.prototype.enforceFocus = function() {}
+            $('#sss').select2({
+                dir: "ltr",
+                dropdownParent: $('#sss').closest('.modal-content')
             });
 
             var table = $('#file-exports').DataTable({

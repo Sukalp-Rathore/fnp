@@ -156,4 +156,105 @@ class NotificationController extends Controller
         }
     }
 
+    public function sendMailPrimary(Request $request)
+    {
+        $request->validate([
+            'customer_ids' => 'required|array',
+            'mail_template' => 'required|string',
+        ]);
+
+        // Set subject based on mail template
+        $subjects = [
+            'rakhi' => 'Celebrate the Bond of Love this Rakhi – Pre-Book Now 🎁',
+            'diwali' => 'Light Up Their Diwali – Pre-Book Your Festive Gifts Today ✨',
+            'birthday' => 'Surprise Them on Their Birthday – Book Fresh Flowers & Gifts 🎂',
+            'anniversary' => 'Celebrate Love & Togetherness – Send Anniversary Surprises 💞',
+            'newyear' => 'Welcome 2026 with Fresh Flowers & Celebration Hampers 🎉'
+        ];
+
+        $subject = $subjects[$request->mail_template] ?? 'Flowers n Petals – Special Offer Just for You';
+        // dd($request->all());
+        foreach ($request->customer_ids as $entry) {
+            $customer = Customer::find($entry['customer_id']);
+            if (!$customer || !$customer->customer_email) {
+                continue;
+            }
+            $details = [
+                'customer_name' => $customer->customer_name,
+                'secondary_customer_name' => $entry['secondary_name'] ?? '',
+            ];
+            $templatePath = 'Emails.' . $request->mail_template;
+            Mail::send($templatePath, ['details' => $details], function ($message) use ($customer, $subject) {
+                $message->to($customer->customer_email)
+                        ->subject($subject);
+            });     
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Emails sent successfully.',
+        ]);
+    }
+
+    public function sendWhatsappPrimary(Request $request)
+    {
+        $request->validate([
+            'customer_ids' => 'required|array',
+            'event' => 'required|string',
+        ]);
+    
+        $toAndComponents = [];
+        foreach ($request->customer_ids as $entry) {
+            $customer = Customer::find($entry['customer_id']);
+            if (!$customer || empty($customer->customer_phone)) {
+                continue;
+            }
+            $phone = preg_replace('/\D/', '', $customer->customer_phone); // Remove non-numeric characters
+            $formattedPhone = strlen($phone) === 10 ? '91' . $phone : $phone; // Add '91' if length is 10
+
+            $toAndComponents[] = [
+                "to" => [$formattedPhone],
+                "components" => [
+                    "body_1" => [
+                        "type" => "text",
+                        "value" => $customer->customer_name
+                    ],
+                    "body_2" => [
+                        "type" => "text",
+                        "value" => $entry['secondary_name'] ?? ''
+                    ]
+                ]
+            ];
+        }
+    
+        $payload = [
+            "integrated_number" => "918109535634",
+            "content_type" => "template",
+            "payload" => [
+                "messaging_product" => "whatsapp",
+                "type" => "template",
+                "template" => [
+                    "name" => $request->event,
+                    "language" => [
+                        "code" => "en",
+                        "policy" => "deterministic"
+                    ],
+                    "namespace" => "a6f0d3b7_77f1_463a_94dd_a8c9f5054401",
+                    "to_and_components" => $toAndComponents
+                ]
+            ]
+        ];
+    
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'authkey' => '451815AXQYneFUH686786fbP1' // Replace with your actual authkey
+        ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/', $payload);
+    
+        if ($response->successful()) {
+            return response()->json(['success' => true, 'message' => 'WhatsApp messages sent successfully.']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Failed to send WhatsApp messages.'], $response->status());
+        }
+    }
+
 }

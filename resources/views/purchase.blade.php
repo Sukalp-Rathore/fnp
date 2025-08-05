@@ -1,7 +1,8 @@
 @extends('layout')
 @section('content')
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
-
+    <!-- jQuery Confirm CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.min.css">
 
     <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
         <div>
@@ -26,31 +27,24 @@
                                 <tr>
                                     <th>S.No</th>
                                     <th>Person Name</th>
-                                    <th>Amount</th>
-                                    <th>Amount Paid</th>
-                                    <th>Amount Pending</th>
-                                    <th>Payment Mode</th>
-                                    <th>Payment Status</th>
-                                    <th>Date</th>
+                                    <th>Total Purchase</th>
+                                    <th>Payment Pending</th>
+                                    <th>Last Entry</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($purchases as $v)
-                                    @php
-                                        $pending = $v->amount - $v->paid_amount;
-                                        if ($pending < 0) {
-                                            $pending = 0;
-                                        }
-                                    @endphp
+                                @foreach ($vendors as $index => $vendor)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $v->purchase_person }}</td>
-                                        <td>{{ $v->amount }}</td>
-                                        <td>{{ $v->paid_amount }}</td>
-                                        <td>{{ $pending }}</td>
-                                        <td>{{ $v->payment_mode }}</td>
-                                        <td>{{ $v->payment_status }}</td>
-                                        <td>{{ getutc($v->created_at, 'd.m.Y') }}</td>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $vendor->name }}</td>
+                                        <td>{{ $vendor->total_purchase ?? 0 }}</td>
+                                        <td>{{ $vendor->amount_pending ?? 0 }}</td>
+                                        <td>{{ getutc($vendor->updated_at, 'd.m.Y') ?? '' }}</td>
+                                        <td>
+                                            <button class="btn btn-info btn-sm viewVendorPurchasesBtn"
+                                                data-name="{{ $vendor->name }}">View Details</button>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -68,7 +62,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h6 class="modal-title" id="staticBackdropLabel2">Enter Todays Sales
+                    <h6 class="modal-title" id="staticBackdropLabel2">Enter Todays Purchase
                     </h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -84,6 +78,10 @@
                                         <option value="{{ $vendor->name }}">{{ $vendor->name }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+                            <div class="col-xl-12 form-group">
+                                <label for="date">Entry Date</label>
+                                <input type="date" class="form-control" id="date" name="date" required>
                             </div>
                             <div class="col-xl-12 form-group">
                                 <label for="amount" class="form-label text-default">Amount (Rs)</label>
@@ -193,8 +191,61 @@
         </div>
     </div>
     {{-- name edit modal end   --}}
+    {{-- Modals for edit vendor  --}}
+    <div class="modal fade" id="editPurchaseModal" tabindex="-1" aria-labelledby="exampleModalLgLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalLgLabel">Update Entry</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="responsed">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="vendorPurchasesModal" tabindex="-1" aria-labelledby="vendorPurchasesModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="vendorPurchasesModalLabel">Vendor Purchases</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table id="vendorPurchasesTable" class="table table-bordered w-100">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>Person Name</th>
+                                <th>Amount</th>
+                                <th>Amount Paid</th>
+                                <th>Amount Pending</th>
+                                <th>Total Amount Pending</th>
+                                <th>Payment Mode</th>
+                                <th>Payment Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Purchases will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{-- modal end --}}
 @endsection
 @section('js')
+    <!-- jQuery Confirm JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/js/jquery-confirm.min.js"></script>
     <!-- Custom JS -->
     <script src="assets/js/custom.js"></script>
 
@@ -387,6 +438,131 @@
                         }
                     });
                 }
+            });
+
+            $(document).on('click', '.editBtn', function() {
+                let purchaseId = $(this).attr('data-id');
+                $("#editPurchaseModal").modal('show');
+                $.ajax({
+                    url: "{{ route('purchase.show.edit') }}",
+                    type: 'POST',
+                    data: {
+                        purchaseId: purchaseId,
+                    },
+                    success: function(response) {
+                        if (response.success == false) {
+                            alert(response.message);
+                        } else {
+                            $("#responsed").html(response);
+                            $("#vendorPurchasesModal").modal('hide');
+                        };
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error response
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
+
+            $(document).on('click', '.viewVendorPurchasesBtn', function() {
+                let vendorName = $(this).data('name');
+                $('#vendorPurchasesModal').modal('show');
+                $.ajax({
+                    url: "{{ route('purchase.vendor.purchases') }}",
+                    type: "POST",
+                    data: {
+                        vendor_name: vendorName,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            let rows = '';
+                            response.purchases.forEach(function(p, idx) {
+                                let pending = p.amount - p.paid_amount;
+                                if (pending < 0) pending = 0;
+                                rows += `
+                        <tr>
+                            <td>${idx + 1}</td>
+                            <td>${p.purchase_person}</td>
+                            <td>${p.amount}</td>
+                            <td>${p.paid_amount}</td>
+                            <td>${pending}</td>
+                            <td>${p.total_pending_amount}</td>
+                            <td>${p.payment_mode}</td>
+                            <td>${p.payment_status}</td>
+                            <td>${p.date}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm editBtn" data-id="${p.id}"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-danger btn-sm deleteBtn" data-id="${p.id}"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                            });
+                            $('#vendorPurchasesTable tbody').html(rows);
+                            // Initialize DataTable if not already
+                            if (!$.fn.DataTable.isDataTable('#vendorPurchasesTable')) {
+                                $('#vendorPurchasesTable').DataTable();
+                            }
+                        } else {
+                            $('#vendorPurchasesTable tbody').html(
+                                '<tr><td colspan="9">No purchases found.</td></tr>');
+                        }
+                    },
+                    error: function() {
+                        $('#vendorPurchasesTable tbody').html(
+                            '<tr><td colspan="9">Error loading purchases.</td></tr>');
+                    }
+                });
+            });
+
+            $(document).on('click', '.deleteBtn', function() {
+                let purchaseId = $(this).attr('data-id');
+
+                $.confirm({
+                    title: 'Confirm Deletion',
+                    content: 'Are you sure you want to delete this purchase?',
+                    buttons: {
+                        confirm: {
+                            text: 'Yes, Delete',
+                            btnClass: 'btn-red',
+                            action: function() {
+                                $.ajax({
+                                    url: "{{ route('purchase.delete') }}",
+                                    type: 'POST',
+                                    data: {
+                                        purchaseId: purchaseId,
+                                        _token: '{{ csrf_token() }}' // add CSRF token manually if needed
+                                    },
+                                    success: function(response) {
+                                        if (response.success == false) {
+                                            $.alert({
+                                                title: 'Error',
+                                                content: response.message,
+                                                type: 'red'
+                                            });
+                                        } else {
+                                            toastr.success(response.message);
+                                            setTimeout(function() {
+                                                window.location.reload();
+                                            }, 1000);
+                                        }
+                                    },
+                                    error: function(xhr, status, error) {
+                                        console.error(xhr.responseText);
+                                        $.alert({
+                                            title: 'Ajax Error',
+                                            content: 'Something went wrong while deleting.',
+                                            type: 'red'
+                                        });
+                                    }
+                                });
+                            }
+                        },
+                        cancel: function() {
+                            // Do nothing on cancel
+                        }
+                    }
+                });
             });
         });
     </script>

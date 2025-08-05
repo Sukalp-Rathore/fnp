@@ -22,6 +22,7 @@
                                 <tr>
                                     <th>S.No</th>
                                     <th>Customer Name</th>
+                                    <th>Making Charge</th>
                                     <th>Bouquet Price</th>
                                     <th>Created By</th>
                                     <th>Created At</th>
@@ -35,6 +36,7 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $b->customer_name }}</td>
+                                        <td>{{ $b->making_charge }}</td>
                                         <td>{{ $b->total_price }}</td>
                                         <td>{{ $b->created_by ?? 'N/A' }}</td>
                                         <td>{{ getutc($b->created_at, 'd.m.Y') }}</td>
@@ -68,6 +70,13 @@
                 <div class="modal-body">
                     <div id="inventoryTableContainer">
                         <!-- Inventory table will be loaded here dynamically -->
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-header">Making Charge</div>
+                        <div class="card-body">
+                            <input type="text" class="form-control mb-2" name="making_charge" placeholder="Making Charge"
+                                autocomplete="off">
+                        </div>
                     </div>
                     <div class="card mt-3">
                         <div class="card-header">Created By</div>
@@ -135,6 +144,7 @@
                     </table>
                     <h6 class="mt-3">Details</h6>
                     <p><strong>Total Price:</strong> <span id="bouquetTotalPrice"></span></p>
+                    <p><strong>Making Charge:</strong> <span id="bouquetMakingPrice"></span></p>
                     <p><strong>Customer Name:</strong> <span id="bouquetCustomerName"></span></p>
                     <p><strong>Customer Email:</strong> <span id="bouquetCustomerEmail"></span></p>
                     <p><strong>Customer Phone:</strong> <span id="bouquetCustomerPhone"></span></p>
@@ -163,6 +173,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="receiptContent">
+                    <div class="text-center mb-3">
+                        <img id="receiptBouquetImage" src="" alt="Bouquet Image" class="img-fluid"
+                            style="max-height: 200px; object-fit: contain;">
+                    </div>
                     <h6>Items in Bouquet</h6>
                     <table class="table table-bordered">
                         <thead>
@@ -176,6 +190,7 @@
                             <!-- Items will be dynamically added here -->
                         </tbody>
                     </table>
+                    <p class="fs-6">Making Charge: <span id="receiptMakingCharge"></span></p>
                     <h6 class="mt-3">Total Price: <span id="receiptTotalPrice"></span></h6>
                 </div>
                 <div class="modal-footer">
@@ -255,6 +270,7 @@
                 formData.append('delivery_date', $('input[name="delivery_date"]').val());
                 formData.append('delivery_address', $('textarea[name="delivery_address"]').val());
                 formData.append('created_by', $('input[name="created_by"]').val());
+                formData.append('making_charge', $('input[name="making_charge"]').val());
 
                 // Collect items as an array
                 $('#inventoryTableContainer').find('tr').each(function(index) {
@@ -295,6 +311,7 @@
                 $('#bouquetImage').attr('src', '');
                 $('#bouquetItemsTable').html('');
                 $('#bouquetTotalPrice').text('');
+                $('#bouquetMakingPrice').text('');
                 $('#bouquetCustomerName').text('');
                 $('#bouquetCustomerEmail').text('');
                 $('#bouquetCustomerPhone').text('');
@@ -330,6 +347,7 @@
 
                             // Set other details
                             $('#bouquetTotalPrice').text(bouquet.total_price);
+                            $('#bouquetMakingPrice').text(bouquet.making_charge || 'N/A');
                             $('#bouquetCustomerName').text(bouquet.customer_name || 'N/A');
                             $('#bouquetCustomerEmail').text(bouquet.customer_email || 'N/A');
                             $('#bouquetCustomerPhone').text(bouquet.customer_phone || 'N/A');
@@ -369,53 +387,12 @@
                 });
             });
 
-            $(document).on('click', '#updateBouquetBtn', function() {
-                let formData = new FormData();
-                formData.append('_token', '{{ csrf_token() }}');
-                formData.append('bouquet_id', $('input[name="bouquet_id"]').val());
-                formData.append('edit_customer_name', $('input[name="edit_customer_name"]').val());
-                formData.append('edit_customer_email', $('input[name="edit_customer_email"]').val());
-                formData.append('edit_customer_phone', $('input[name="edit_customer_phone"]').val());
-                formData.append('edit_delivery_date', $('input[name="edit_delivery_date"]').val());
-                formData.append('edit_delivery_address', $('textarea[name="edit_delivery_address"]').val());
-
-                // Collect items as an array
-                $('.edit-quantity').each(function(index) {
-                    const id = $(this).data('id');
-                    const quantity = $(this).val();
-                    if (quantity > 0) {
-                        formData.append(`items[${index}][id]`, id); // Append item ID
-                        formData.append(`items[${index}][quantity]`,
-                            quantity); // Append item quantity
-                    }
-                });
-
-                $.ajax({
-                    url: "{{ route('bouquet.update') }}",
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function(response) {
-                        if (response.success) {
-                            toastr.success(response.message);
-                            $('#editBouquetModal').modal('hide');
-                            setTimeout(() => location.reload(), 1000);
-                        } else {
-                            toastr.error(response.message);
-                        }
-                    },
-                    error: function(xhr) {
-                        toastr.error('Failed to update bouquet.');
-                    }
-                });
-            });
-
             $(document).on('click', '.printBtn', function() {
                 const bouquetId = $(this).data('id'); // Get the bouquet ID from the button's data attribute
 
                 // Clear previous modal content
                 $('#receiptItemsTable').html('');
+                $('#receiptMakingCharge').text('');
                 $('#receiptTotalPrice').text('');
 
                 // Fetch bouquet details
@@ -430,6 +407,8 @@
                         if (response.success) {
                             const bouquet = response;
 
+                            // Set bouquet image
+                            $('#receiptBouquetImage').attr('src', bouquet.bouquet_image);
                             // Populate the items table
                             let itemsHtml = '';
                             bouquet.items.forEach(item => {
@@ -442,7 +421,8 @@
                                 `;
                             });
                             $('#receiptItemsTable').html(itemsHtml);
-
+                            // Set making charge
+                            $('#receiptMakingCharge').text(bouquet.making_charge || 'N/A');
                             // Set total price
                             $('#receiptTotalPrice').text(bouquet.total_price);
 

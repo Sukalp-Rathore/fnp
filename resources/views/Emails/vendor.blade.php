@@ -48,15 +48,15 @@
         <p>You have been assigned a new order. Below are the order details:</p>
 
         <div class="info">
-            <p><strong>Customer Name Primary:</strong> {{ $details['order_details']['customer_name_primary'] }}</p>
-            <p><strong>Customer Email Primary:</strong> {{ $details['order_details']['customer_email_primary'] }}</p>
-            <p><strong>Customer Phone Primary:</strong> {{ $details['order_details']['customer_mobile_primary'] }}</p>
+            <p><strong>Customer Name :</strong> {{ $details['order_details']['customer_name'] }}</p>
+            <p><strong>Customer Email :</strong> {{ $details['order_details']['customer_email'] }}</p>
+            <p><strong>Customer Phone :</strong> {{ $details['order_details']['customer_mobile'] }}</p>
             <p><strong>Address:</strong> {{ $details['order_details']['customer_address'] }}</p>
             <p><strong>City:</strong> {{ $details['order_details']['city'] }}</p>
             <p><strong>Event:</strong> {{ $details['order_details']['event_name'] }}</p>
             <p><strong>Delivery Date:</strong> {{ getutc($details['order_details']['delivery_date'], 'd.m.y') }}</p>
             <p><strong>Products:</strong> {{ $details['order_details']['products'] }}</p>
-            <p><strong>Sender Name:</strong>{{ $details['order_details']['sender_name'] }}</p>
+            <p><strong>Message:</strong> {{ $details['order_details']['message'] }}</p>
         </div>
 
         <div class="footer">

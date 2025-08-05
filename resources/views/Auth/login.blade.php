@@ -162,7 +162,7 @@
             <div class="authentication-cover overflow-hidden">
                 <div class="aunthentication-cover-content d-flex align-items-center justify-content-center">
                     <div>
-                        <h1 class="text-fixed-white mb-1 fw-medium" style="font-size:2.3rem">Welcome To Flowers and
+                        <h1 class="text-fixed-white mb-1 fw-medium" style="font-size:2.3rem">Welcome To Flowers N
                             Petals!
                         </h1>
                         <h6 class="text-fixed-white mb-3">Flowers and Petals management system.</h6>

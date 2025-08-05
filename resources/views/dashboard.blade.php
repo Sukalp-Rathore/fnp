@@ -1,6 +1,11 @@
 @extends('layout')
 
 @section('content')
+    <style>
+        input[type="checkbox"] {
+            border: 1px solid black !important;
+        }
+    </style>
     <!-- FlatPickr CSS -->
     <link rel="stylesheet" href="assets/libs/flatpickr/flatpickr.min.css">
     <!-- Prism CSS -->
@@ -214,13 +219,14 @@
                         </div>
                     @else
                         <div class="table-responsive">
-                            <table id="datatable-basics" class="table text-nowrap">
+                            <table id="datatable-basics" class="table text-nowrap table-bordered">
                                 <thead>
                                     <tr>
                                         <th class="text-center">
                                             <input class="form-check-input" type="checkbox" id="select-all"
                                                 value="" aria-label="...">
                                         </th>
+                                        <th>S.No</th>
                                         <th>Customer Name</th>
                                         <th>Customer Phone</th>
                                         <th>Customer Email</th>
@@ -234,6 +240,9 @@
                                             <td class="text-center">
                                                 <input class="form-check-input" type="checkbox" id="checkboxNoLabel02"
                                                     value="{{ $c->_id }}" aria-label="..." checked>
+                                            </td>
+                                            <td>
+                                                {{ $loop->iteration }}
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center gap-3">
@@ -284,13 +293,14 @@
                         </div>
                     @else
                         <div class="table-responsive">
-                            <table id="datatable-basict" class="table text-nowrap">
+                            <table id="datatable-basict" class="table text-nowrap table-bordered">
                                 <thead>
                                     <tr>
                                         <th class="text-center">
                                             <input class="form-check-input" type="checkbox" id="select-all2"
                                                 value="" aria-label="...">
                                         </th>
+                                        <th>S.No</th>
                                         <th>Customer Name</th>
                                         <th>Customer Phone</th>
                                         <th>Customer Email</th>
@@ -306,6 +316,9 @@
                                             <td class="text-center">
                                                 <input class="form-check-input" type="checkbox" id="check2"
                                                     value="{{ $c->_id }}" aria-label="...">
+                                            </td>
+                                            <td>
+                                                {{ $loop->iteration }}
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center gap-3">
@@ -332,6 +345,86 @@
                                             </td>
                                             <td>
                                                 <span class="badge bg-primary-transparent">{{ $c->customer_type }}</span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-12">
+            <div class="card custom-card overflow-hidden">
+                <div class="card-header justify-content-between">
+                    <div class="card-title" style="font-size:0.85rem !important">
+                        Primary Customers With Secondary Customers Upcoming Event(3days)
+                    </div>
+                    <div>
+                        <a href="javascript:void(0);" class="btn btn-secondary btn-sm send-mail-primary"
+                            data-bs-toggle="modal" data-bs-target="#mailPrimaryTemplateModal">Send Mail</a>
+                        <a href="javascript:void(0);" class="btn btn-primary btn-sm send-whatsapp-primary"
+                            data-bs-toggle="modal" data-bs-target="#whatsappPrimaryTemplateModal">Whatsapp</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (sizeof($primaryWithUpcomingSecondary) == 0)
+                        <div class="alert alert-primary" role="alert">
+                            No Such Customers Found!
+                        </div>
+                    @else
+                        <div class="table-responsive">
+                            <table id="datatable-basica" class="table text-nowrap table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">
+                                            <input class="form-check-input" type="checkbox" id="select-all3"
+                                                value="" aria-label="...">
+                                        </th>
+                                        <th>S.No</th>
+                                        <th>Customer Name(P)</th>
+                                        <th>Customer Phone(P)</th>
+                                        <th>Customer Email(P)</th>
+                                        <th>Secondary Customer Name</th>
+                                        <th>Event Date(S)</th>
+                                        <th>Event Name(S)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($primaryWithUpcomingSecondary as $c)
+                                        <tr>
+                                            <td class="text-center">
+                                                <input class="form-check-input" type="checkbox" id="check3"
+                                                    value="{{ $c['primary_id'] }}"
+                                                    data-secondary-name="{{ $c['secondary_name'] }}" aria-label="...">
+                                            </td>
+                                            <td>
+                                                {{ $loop->iteration }}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div>
+                                                        <span class="d-block fw-medium">{{ $c['primary_name'] }}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {{ $c['primary_phone'] }}
+                                            </td>
+                                            <td>
+                                                {{ $c['primary_email'] }}
+                                            </td>
+                                            <td>
+                                                {{ $c['secondary_name'] }}
+                                            </td>
+                                            <td>
+                                                <span
+                                                    class="badge bg-primary">{{ getutc($c['event_date'], 'd.m.Y') }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ $c['event_name'] }}</span>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -374,6 +467,35 @@
         </div>
     </div>
 
+    <!-- Mail Template Primary Secondary Selection Modal -->
+    <div class="modal fade" id="mailPrimaryTemplateModal" tabindex="-1" aria-labelledby="mailTemplateModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mailTemplateModalLabel">Select Mail Template</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="mailPrimaryTemplateForm">
+                        <div class="mb-3">
+                            <label for="mailTemplate" class="form-label">Choose Template</label>
+                            <select class="form-select" id="mailTemplate" name="mail_template" required>
+                                <option value="" selected disabled>Choose A Occasion</option>
+                                <option value="diwali1">Diwali</option>
+                                <option value="rakhi1">Rakhi</option>
+                                <option value="newyear1">New Year</option>
+                                <option value="birthdays1">Birthday</option>
+                                <option value="anniversary1">Anniversary</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Emails</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- WhatsApp Template Selection Modal -->
     <div class="modal fade" id="whatsappTemplateModal" tabindex="-1" aria-labelledby="whatsappTemplateModalLabel"
         aria-hidden="true">
@@ -395,6 +517,35 @@
                                 <option value="newyear">New Year</option>
                                 <option value="birthdays">Birthday</option>
                                 <option value="anniversary">Anniversary</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send WhatsApp Messages</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Template Primary Secondary Selection Modal -->
+    <div class="modal fade" id="whatsappPrimaryTemplateModal" tabindex="-1"
+        aria-labelledby="whatsappTemplateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="whatsappTemplateModalLabel">Select WhatsApp Template</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="whatsappPrimaryTemplateForm">
+                        <div class="mb-3">
+                            <label for="whatsappTemplate" class="form-label">Choose Template</label>
+                            <select class="form-select" id="whatsappTemplate" name="whatsapp_template" required>
+                                <option value="" selected disabled>Choose A Occasion</option>
+                                <option value="diwali1">Diwali</option>
+                                <option value="rakhi1">Rakhi</option>
+                                <option value="newyear1">New Year</option>
+                                <option value="birthdays1">Birthday</option>
+                                <option value="anniversary1">Anniversary</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Send WhatsApp Messages</button>
@@ -448,17 +599,30 @@
                 "pageLength": 10,
                 // scrollX: true
             });
-
-            // Handle "Select All" checkbox
+            $('#datatable-basica').DataTable({
+                language: {
+                    searchPlaceholder: 'Search...',
+                    sSearch: '',
+                },
+                "pageLength": 10,
+                // scrollX: true
+            });
+            // Select All for datatable-basics
             $('#select-all').on('click', function() {
                 var isChecked = $(this).is(':checked');
-                $('input.form-check-input').prop('checked', isChecked);
+                $('#datatable-basics tbody input.form-check-input').prop('checked', isChecked);
             });
 
-            // Handle "Select All" checkbox
+            // Select All for datatable-basict
             $('#select-all2').on('click', function() {
                 var isChecked = $(this).is(':checked');
-                $('input.form-check-input').prop('checked', isChecked);
+                $('#datatable-basict tbody input.form-check-input').prop('checked', isChecked);
+            });
+
+            // Select All for datatable-basica
+            $('#select-all3').on('click', function() {
+                var isChecked = $(this).is(':checked');
+                $('#datatable-basica tbody input.form-check-input').prop('checked', isChecked);
             });
 
             // Ensure "Select All" checkbox updates when individual checkboxes are clicked
@@ -471,6 +635,14 @@
             });
 
             $('#datatable-basics tbody').on('change', 'input.form-check-input', function() {
+                if ($('input.form-check-input:checked').length === $('input.form-check-input').length) {
+                    $('#select-all').prop('checked', true);
+                } else {
+                    $('#select-all').prop('checked', false);
+                }
+            });
+
+            $('#datatable-basica tbody').on('change', 'input.form-check-input', function() {
                 if ($('input.form-check-input:checked').length === $('input.form-check-input').length) {
                     $('#select-all').prop('checked', true);
                 } else {
@@ -492,6 +664,24 @@
 
                 // Populate the mail template modal with the selected customer data
                 $('#mailTemplateModal').modal('show');
+            });
+
+            $('.send-mail-primary').on('click', function() {
+                let selectedCustomers = [];
+                $('input.form-check-input:checked').each(function() {
+                    selectedCustomers.push({
+                        customer_id: $(this).val(),
+                        secondary_name: $(this).data('secondary-name')
+                    });
+                });
+                console.log(selectedCustomers, "ssaa");
+                if (selectedCustomers.length === 0) {
+                    toastr.error('Please select at least one customer.');
+                    return;
+                }
+
+                // Populate the mail template modal with the selected customer data
+                $('#mailPrimaryTemplateModal').modal('show');
             });
 
             // Handle mail template form submission
@@ -529,6 +719,43 @@
                 });
             });
 
+            $('#mailPrimaryTemplateForm').on('submit', function(e) {
+                e.preventDefault();
+                let selectedCustomers = [];
+                $('input.form-check-input:checked').each(function() {
+                    selectedCustomers.push({
+                        customer_id: $(this).val(),
+                        secondary_name: $(this).data('secondary-name')
+                    });
+                });
+                console.log(selectedCustomers, "ss");
+
+
+                let formData = $(this).serializeArray();
+                let template = formData.find(field => field.name === 'mail_template').value;
+
+                $.ajax({
+                    url: "{{ route('send.mail.primary') }}",
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        customer_ids: selectedCustomers,
+                        mail_template: template
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                        $('#mailPrimaryTemplateModal').modal('hide');
+                    },
+                    error: function(xhr) {
+                        toastr.error('An error occurred while sending emails.');
+                    }
+                });
+            });
+
             // Handle Send WhatsApp button click
             $('.send-whatsapp').on('click', function() {
                 let selectedCustomers = [];
@@ -546,6 +773,27 @@
 
                 // Open the WhatsApp template modal
                 $('#whatsappTemplateModal').modal('show');
+            });
+
+            $('.send-whatsapp-primary').on('click', function() {
+                let selectedCustomers = [];
+                $('input.form-check-input:checked').each(function() {
+                    selectedCustomers.push({
+                        customer_id: $(this).val(),
+                        secondary_name: $(this).data('secondary-name')
+                    });
+                });
+
+                if (selectedCustomers.length === 0) {
+                    alert('Please select at least one customer.');
+                    return;
+                }
+
+                // Store selected customers for use in the form submission
+                $('#whatsappPrimaryTemplateForm').data('selectedCustomers', selectedCustomers);
+
+                // Open the WhatsApp template modal
+                $('#whatsappPrimaryTemplateModal').modal('show');
             });
 
             $('#whatsappTemplateForm').on('submit', function(e) {
@@ -571,6 +819,36 @@
                             toastr.error(response.message);
                         }
                         $('#whatsappTemplateModal').modal('hide');
+                    },
+                    error: function(xhr) {
+                        toastr.error('An error occurred while sending WhatsApp messages.');
+                    }
+                });
+            });
+
+            $('#whatsappPrimaryTemplateForm').on('submit', function(e) {
+                e.preventDefault();
+
+                let selectedCustomers = $(this).data('selectedCustomers'); // Retrieve selected customers
+                let formData = $(this).serializeArray();
+                let template = formData.find(field => field.name === 'whatsapp_template').value;
+
+                // Send the WhatsApp messages via AJAX to the backend
+                $.ajax({
+                    url: "{{ route('send.whatsapp.primary') }}",
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        customer_ids: selectedCustomers,
+                        event: template
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                        $('#whatsappPrimaryTemplateModal').modal('hide');
                     },
                     error: function(xhr) {
                         toastr.error('An error occurred while sending WhatsApp messages.');
