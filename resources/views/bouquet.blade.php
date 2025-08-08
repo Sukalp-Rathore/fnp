@@ -178,7 +178,7 @@
                             style="max-height: 200px; object-fit: contain;">
                     </div>
                     <h6>Items in Bouquet</h6>
-                    <table class="table table-bordered">
+                    <table class="table table-bordered mb-2">
                         <thead>
                             <tr>
                                 <th>Item Name</th>

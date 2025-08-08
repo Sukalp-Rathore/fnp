@@ -374,7 +374,7 @@
                                 // Populate the dropdown with the fetched vendors
                                 vendors.forEach(function(vendor) {
                                     vendorDropdown.append(
-                                        `<option value="${vendor._id}">${vendor.first_name}</option>`
+                                        `<option value="${vendor.id}">${vendor.first_name}</option>`
                                     );
                                 });
                             }

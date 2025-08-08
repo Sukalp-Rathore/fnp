@@ -221,6 +221,7 @@ class BouquetController extends Controller
             'items' => $items,
             'bouquet_image' => $bouquet->bouquet_image, // Use the bouquet image stored in the bouquet
             'total_price' => $bouquet->total_price, // Use the total price stored in the bouquet
+            'making_charge' => $bouquet->making_charge, // Use the making charge stored in the bouquet
         ]);
     }
 
