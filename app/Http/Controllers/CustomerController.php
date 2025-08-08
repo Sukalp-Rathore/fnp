@@ -145,7 +145,7 @@ class CustomerController extends Controller
         ]);
         $customerId = $request->input('customerId');
         $customer = Customer::where('_id', $customerId)->first();
-        $// Fetch events from CommonEvent
+        // Fetch events from CommonEvent
     $commonEvents = CommonEvent::first();
     $events = $commonEvents ? $commonEvents->events : [];
 
