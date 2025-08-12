@@ -20,6 +20,7 @@
                         <button class="btn btn-primary btn-sm send-mail" data-bs-toggle="modal"
                             data-bs-target="#mailTemplateModal">Send Mail</button>
                         <button class="btn btn-secondary btn-sm send-whatsapp">Whatsapp Notification</button>
+                        <button class="btn btn-warning btn-sm send-whatsapp-all">Send Whatsapp All</button>
                     </div>
                 </div>
                 <div class="card-body">
@@ -92,6 +93,7 @@
                                 <option value="" selected disabled>Choose A Occasion</option>
                                 <option value="diwali">Diwali</option>
                                 <option value="christmas">Christmas</option>
+                                <option value="independenceday">Independence Day</option>
                                 <option value="rakhi">Rakhi</option>
                                 <option value="newyear">New Year</option>
                                 <option value="birthdays">Birthday</option>
@@ -99,6 +101,37 @@
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Send WhatsApp Messages</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp Template ALL Selection Modal -->
+    <div class="modal fade" id="whatsappAllTemplateModal" tabindex="-1" aria-labelledby="whatsappTemplateModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="whatsappTemplateModalLabel">Select WhatsApp Template</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="whatsappAllTemplateForm">
+                        <div class="mb-3">
+                            <label for="whatsappTemplate" class="form-label">Choose Template</label>
+                            <select class="form-select" id="whatsappTemplate" name="whatsapp_template" required>
+                                <option value="" selected disabled>Choose A Occasion</option>
+                                <option value="diwali">Diwali</option>
+                                <option value="christmas">Christmas</option>
+                                <option value="independenceday">Independence Day</option>
+                                <option value="rakhi">Rakhi</option>
+                                <option value="newyear">New Year</option>
+                                <option value="birthdays">Birthday</option>
+                                <option value="anniversary">Anniversary</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Send All Customers</button>
                     </form>
                 </div>
             </div>
@@ -247,6 +280,11 @@
                 $('#whatsappTemplateModal').modal('show');
             });
 
+            $('.send-whatsapp-all').on('click', function() {
+                // Open the WhatsApp template modal
+                $('#whatsappAllTemplateModal').modal('show');
+            });
+
             // Handle mail template form submission
             $('#mailTemplateForm').on('submit', function(e) {
                 e.preventDefault();
@@ -296,6 +334,32 @@
                     data: {
                         _token: '{{ csrf_token() }}',
                         customer_ids: selectedCustomers,
+                        event: template
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success(response.message);
+                        } else {
+                            toastr.error(response.message);
+                        }
+                        $('#whatsappTemplateModal').modal('hide');
+                    },
+                    error: function(xhr) {
+                        toastr.error('An error occurred while sending WhatsApp messages.');
+                    }
+                });
+            });
+
+            $('#whatsappAllTemplateForm').on('submit', function(e) {
+                e.preventDefault();
+                let formData = $(this).serializeArray();
+                let template = formData.find(field => field.name === 'whatsapp_template').value;
+                // Send the WhatsApp messages via AJAX to the backend
+                $.ajax({
+                    url: "{{ route('send.whatsapp.all') }}",
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
                         event: template
                     },
                     success: function(response) {

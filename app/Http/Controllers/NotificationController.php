@@ -107,7 +107,7 @@ class NotificationController extends Controller
     
         // Fetch customer phone numbers and names
         $customers = Customer::whereIn('_id', $request->customer_ids)->get();
-    
+        dd(sizeof($customers));
         $toAndComponents = [];
         foreach ($customers as $customer) {
             if (empty($customer->customer_phone)) {
@@ -225,6 +225,62 @@ class NotificationController extends Controller
                     ]
                 ]
             ];
+        }
+    
+        $payload = [
+            "integrated_number" => "918109535634",
+            "content_type" => "template",
+            "payload" => [
+                "messaging_product" => "whatsapp",
+                "type" => "template",
+                "template" => [
+                    "name" => $request->event,
+                    "language" => [
+                        "code" => "en",
+                        "policy" => "deterministic"
+                    ],
+                    "namespace" => "a6f0d3b7_77f1_463a_94dd_a8c9f5054401",
+                    "to_and_components" => $toAndComponents
+                ]
+            ]
+        ];
+    
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'authkey' => '451815AXQYneFUH686786fbP1' // Replace with your actual authkey
+        ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/', $payload);
+    
+        if ($response->successful()) {
+            return response()->json(['success' => true, 'message' => 'WhatsApp messages sent successfully.']);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Failed to send WhatsApp messages.'], $response->status());
+        }
+    }
+
+    public function sendWhatsappAll(Request $request)
+    {
+        $request->validate([
+            'event' => 'required|string',
+        ]);
+    
+        // Fetch customer phone numbers and names
+        $customers = Customer::get();
+        $toAndComponents = [];
+        foreach ($customers as $customer) {
+            if (empty($customer->customer_phone)) {
+                continue; // Skip if phone number is not set
+            }
+            $phone = preg_replace('/\D/', '', $customer->customer_phone); // Remove non-numeric characters
+            $formattedPhone = strlen($phone) === 10 ? '91' . $phone : $phone; // Add '91' if length is 10
+            $toAndComponents[] = [
+                "to" => [$formattedPhone],
+                "components" => [
+                    "body_1" => [
+                        "type" => "text",
+                        "value" => $customer->customer_name // Dynamically send customer_name
+                    ]
+                ]
+            ];  
         }
     
         $payload = [

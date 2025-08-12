@@ -29,6 +29,7 @@ Route::middleware(['web' ,'auth'])->group(function () {
     Route::post('/send-mail', [NotificationController::class, 'sendMail'])->name('send.mail');
     Route::post('/send-mail-primary', [NotificationController::class, 'sendMailPrimary'])->name('send.mail.primary');
     Route::post('/send-whatsapp', [NotificationController::class, 'sendWhatsapp'])->name('send.whatsapp');
+    Route::post('/send-whatsapp-all', [NotificationController::class, 'sendWhatsappAll'])->name('send.whatsapp.all');
     Route::post('/send-whatsapp-primary', [NotificationController::class, 'sendWhatsappPrimary'])->name('send.whatsapp.primary');
     Route::post('/send-sms', [NotificationController::class, 'sendSms'])->name('send.sms');
     Route::get('/mail-test',[NotificationController::class, 'testMail'])->name('mail.test');
