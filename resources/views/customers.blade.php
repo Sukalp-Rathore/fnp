@@ -90,8 +90,8 @@
                             <label for="primary_customer_name" class="form-label">Primary Customer Name</label>
                             <select name="primary_customer_name" id="sss" class="form-select">
                                 <option value="">Select Primary Customer</option>
-                                @foreach ($primaryCustomerNames as $name)
-                                    <option value="{{ $name }}">{{ $name }}</option>
+                                @foreach ($primaryCustomerNames as $name => $phone)
+                                    <option value="{{ $name }}">{{ $name }} ({{ $phone }})</option>
                                 @endforeach
                             </select>
                         </div>

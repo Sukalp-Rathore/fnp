@@ -26,14 +26,16 @@
     <div class="mb-3">
         <label for="customer_type" class="form-label">Customer Type</label>
         <select class="form-select" id="customer_type" name="customer_type">
-            <option value="Primary"
+            <option value="primary"
                 {{ isset($customer) && strtolower($customer->customer_type) == 'primary' ? 'selected' : '' }}>Primary
             </option>
-            <option value="Secondary"
+            <option value="secondary"
                 {{ isset($customer) && strtolower($customer->customer_type) == 'secondary' ? 'selected' : '' }}>
                 Secondary</option>
         </select>
     </div>
+    <input type="hidden" name="primary_customer_name" id="primary_customer_name"
+        value="{{ isset($customer) && strtolower($customer->customer_type) == 'secondary' ? $customer->primary_customer_name : '' }}">
     <div class="mb-3">
         <label for="event_name" class="form-label">Choose event</label>
         <select class="form-select" id="event_name" name="event_name">
@@ -45,6 +47,11 @@
             <option value="" {{ isset($customer) && strtolower($customer->event_name) == '' ? 'selected' : '' }}>
                 None</option>
         </select>
+    </div>
+    <div class="mb-3">
+        <label for="event_date">Event Date</label>
+        <input type="date" class="form-control" value="{{ $customer->event_date }}" id="event_date"
+            name="event_date" placeholder="Select event date" autocomplete="off">
     </div>
     <div class="mb-3">
         <button class="btn btn-secondary" type="submit">Edit Customer</button>

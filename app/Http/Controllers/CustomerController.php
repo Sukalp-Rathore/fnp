@@ -67,7 +67,8 @@ class CustomerController extends Controller
         $allEvents = array_unique(array_merge($events, $festivalEvents));
         // dd($allEvents);
         // Fetch all primary customers and pluck their names
-        $primaryCustomerNames = Customer::where('customer_type', 'primary')->pluck('customer_name')->toArray();
+        $primaryCustomerNames = Customer::where('customer_type', 'primary')->pluck('customer_name','customer_phone')->toArray();
+        // dd($primaryCustomerNames);
         return view('customers', compact('allEvents', 'primaryCustomerNames'));
     }
     
@@ -81,6 +82,7 @@ class CustomerController extends Controller
             'customer_address' => 'nullable|string|max:500',
             'customer_type' => 'required|in:primary,secondary',
             'event_name' => 'nullable|string|max:255',
+            'event_date' => 'nullable|date',
             'primary_customer_name' => 'nullable|string|max:255',
         ]);
 
@@ -105,10 +107,20 @@ class CustomerController extends Controller
                     [$secondaryCustomer]
                 );
                 $primaryCustomer->save();
-    
+                // Create a new record for the secondary customer
+                Customer::create([
+                    'customer_name' => $request->customer_name,
+                    'customer_email' => $request->customer_email,
+                    'customer_phone' => $request->customer_phone,
+                    'customer_address' => $request->customer_address,
+                    'customer_type' => 'secondary',
+                    'event_name' => $request->event_name,
+                    'event_date' => $request->event_date,
+                    'primary_customer_name' => $request->primary_customer_name,
+                ]); 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Secondary customer added to the primary customer record.',
+                    'message' => 'Secondary customer added to the primary customer record. Secondary customer created successfully.',
                 ]);
             } else {
                 // Create a new record for the secondary customer
@@ -146,20 +158,21 @@ class CustomerController extends Controller
         $customerId = $request->input('customerId');
         $customer = Customer::where('_id', $customerId)->first();
         // Fetch events from CommonEvent
-    $commonEvents = CommonEvent::first();
-    $events = $commonEvents ? $commonEvents->events : [];
+        $commonEvents = CommonEvent::first();
+        $events = $commonEvents ? $commonEvents->events : [];
 
-    // Fetch events from FestivalEvent
-    $festivalEvents = FestivalEvent::pluck('events')->flatten()->toArray();
+        // Fetch events from FestivalEvent
+        $festivalEvents = FestivalEvent::pluck('events')->flatten()->toArray();
 
-    // Merge both event arrays and remove duplicates
-    $allEvents = array_unique(array_merge($events, $festivalEvents));
-    // dd($allEvents);
+        // Merge both event arrays and remove duplicates
+        $allEvents = array_unique(array_merge($events, $festivalEvents));
+        // dd($allEvents);
         return view('edit-customer', compact('customer','allEvents'));
     }
 
     public function updateCustomer(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'customerId' => 'required',
             'customer_name' => 'required|string',
@@ -168,6 +181,8 @@ class CustomerController extends Controller
             'customer_address' => 'nullable|string',
             'customer_type' => 'nullable|string',
             'event_name' => 'nullable|string',
+            'event_date' => 'nullable|date',
+            'primary_customer_name' => 'nullable|string|max:255',
         ]);
         $customerId = $request->input('customerId');
         $customer = Customer::where('_id', $customerId)->first();
@@ -177,7 +192,34 @@ class CustomerController extends Controller
         $customer->customer_address = $request->input('customer_address');
         $customer->customer_type = $request->input('customer_type');
         $customer->event_name = $request->input('event_name');
+        $customer->event_date = $request->input('event_date');
+        $customer->primary_customer_name = $request->input('primary_customer_name');
         $customer->save();
+        // dd($customer);
+        if($customer->customer_type === 'secondary') {
+            // If the customer is secondary, we need to update the primary customer as well
+            $primaryCustomer = Customer::where('customer_name', $request->input('primary_customer_name'))->first();
+            if ($primaryCustomer) {
+                $secondaryCustomer = [
+                    'customer_name' => $request->input('customer_name'),
+                    'customer_email' => $request->input('customer_email'),
+                    'customer_phone' => $request->input('customer_phone'),
+                    'event_name' => $request->input('event_name'),
+                    'event_date' => $request->input('event_date'),
+                    'customer_type' => 'secondary',
+                    'customer_address' => $request->input('customer_address'),
+                ];
+                $secondaryCustomers = $primaryCustomer->secondary_customers ?? [];
+                foreach ($secondaryCustomers as $index => $sec) {
+                    // Match by email or phone (adjust condition as per your case)
+                    if ($sec['customer_name'] === $request->input('customer_name')) {
+                        $secondaryCustomers[$index] = $secondaryCustomer;
+                    }
+                }
+                $primaryCustomer->secondary_customers = $secondaryCustomers;
+                $primaryCustomer->save();
+            }
+        }
         return response()->json(['success' => true, 'message' => 'Customer updated successfully']);
     }
 
