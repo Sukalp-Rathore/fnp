@@ -14,6 +14,7 @@
                 <div class="card-header justify-content-between">
                     <div class="card-title">All Sales</div>
                     <div class="card-options">
+                        <span class="badge bg-secondary">Total Sales: {{ $total_sales ?? 0 }} Rs</span>
                         <a class="btn btn-primary btn-sm openForm">Enter Sales</a>
                     </div>
                 </div>
@@ -26,6 +27,8 @@
                                     <th>Cash Sales(Rs)</th>
                                     <th>Online Sales(Rs)</th>
                                     <th>Credit Sales(Rs)</th>
+                                    <th>Today's Total(Rs)</th>
+                                    <th>Overall Total(Rs)</th>
                                     <th>Date</th>
                                     <th>Options</th>
                                 </tr>
@@ -37,6 +40,8 @@
                                         <td>{{ $v->cash_sale }}</td>
                                         <td>{{ $v->online_sale }}</td>
                                         <td>{{ $v->credit_sale }}</td>
+                                        <td>{{ $v->total_sale }}</td>
+                                        <td>{{ $v->overall_sale }}</td>
                                         <td>{{ getutc($v->date, 'd.m.Y') ?? 'N/A' }}</td>
                                         <td>
                                             <button class="btn btn-sm btn-danger deleteBtn"

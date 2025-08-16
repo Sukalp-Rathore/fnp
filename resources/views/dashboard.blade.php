@@ -23,13 +23,30 @@
         <div class="d-flex align-items-center gap-2 flex-wrap">
             <div class="btn-list">
                 <form method="GET" action="{{ route('dashboard') }}">
-                    <input type="hidden" name="filter_by_this_month" value="true">
-                    <button type="submit" class="btn btn-white btn-wave">
-                        <i class="ri-filter-3-line align-middle me-1 lh-1"></i> This Month
-                    </button>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label>Start Date</label>
+                            <input type="date" name="start_date" class="form-control"
+                                value="{{ request('start_date') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label>End Date</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                        </div>
+                    </div>
                 </form>
 
             </div>
+
+            <form method="GET" action="{{ route('dashboard') }}">
+                <input type="hidden" name="filter_by_this_month" value="true">
+                <button type="submit" class="btn btn-white btn-wave">
+                    <i class="ri-filter-3-line align-middle me-1 lh-1"></i> This Month
+                </button>
+            </form>
         </div>
     </div>
     <!-- End::page-header -->
@@ -43,7 +60,7 @@
                                 class="d-flex align-items-start justify-content-between mb-2 gap-1 flex-xxl-nowrap flex-wrap">
                                 <div>
                                     <span class="text-muted d-block mb-1 text-nowrap">Total Sales</span>
-                                    <h4 class="fw-medium mb-0">{{ $totalSales }}</h4>
+                                    <h4 class="fw-medium mb-0">{{ $totalSales ?? 'n/a' }}</h4>
                                 </div>
                                 <div class="lh-1">
                                     <span class="avatar avatar-md avatar-rounded bg-primary">
@@ -61,7 +78,7 @@
                                 class="d-flex align-items-start justify-content-between mb-2 gap-1 flex-xxl-nowrap flex-wrap">
                                 <div>
                                     <span class="text-muted d-block mb-1 text-nowrap">Total Purchase</span>
-                                    <h4 class="fw-medium mb-0">{{ $totalPurchase }}</h4>
+                                    <h4 class="fw-medium mb-0">{{ $totalPurchase ?? 'n/a' }}</h4>
                                 </div>
                                 <div class="lh-1">
                                     <span class="avatar avatar-md avatar-rounded bg-primary1">
@@ -79,7 +96,7 @@
                                 class="d-flex align-items-start justify-content-between mb-2 gap-1 flex-xxl-nowrap flex-wrap">
                                 <div>
                                     <span class="text-muted d-block mb-1 text-nowrap">Total Bouquets</span>
-                                    <h4 class="fw-medium mb-0">{{ $totalBouquets }}</h4>
+                                    <h4 class="fw-medium mb-0">{{ $totalBouquets ?? 'n/a' }}</h4>
                                 </div>
                                 <div class="lh-1">
                                     <span class="avatar avatar-md avatar-rounded bg-primary2">
@@ -97,7 +114,7 @@
                                 class="d-flex align-items-start justify-content-between mb-2 gap-1 flex-xxl-nowrap flex-wrap">
                                 <div>
                                     <span class="text-muted d-block mb-1 text-nowrap">Total Pending Orders</span>
-                                    <h4 class="fw-medium mb-0">{{ $totalPendingOrders }}</h4>
+                                    <h4 class="fw-medium mb-0">{{ $totalPendingOrders ?? 'n/a' }}</h4>
                                 </div>
                                 <div class="lh-1">
                                     <span class="avatar avatar-md avatar-rounded bg-primary3">

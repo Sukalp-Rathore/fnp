@@ -2,6 +2,28 @@
 @section('content')
     <!-- jQuery Confirm CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.min.css">
+    <style>
+        /* Print preview styles */
+        /* Target the receipt message cell only in print */
+        #ss {
+            display: block !important;
+            /* make td behave like a block */
+            width: 500px !important;
+            /* set width */
+            margin: 0 auto !important;
+            /* center horizontally */
+            text-align: center !important;
+            /* center text */
+        }
+
+        /* Optional: prevent table layout from interfering */
+        #ss:before,
+        #ss:after {
+            content: "";
+            display: table;
+        }
+        }
+    </style>
 
     <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
         <div>
@@ -224,7 +246,7 @@
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header justify-content-center">
-                    <img src="assets/images/brand-logos/fnp-logo.jpeg" alt="Logo" style="height:80px;">
+                    <img src="assets/images/brand-logos/fnp-logo.jpeg" alt="Logo" style="height:150px;">
                 </div>
                 <div class="modal-body">
                     <table class="table table-bordered align-middle">
@@ -232,7 +254,8 @@
                             <tr>
                                 <td><strong>Area</strong></td>
                                 <td>
-                                    <input type="text" class="form-control" id="receiptArea" autocomplete="off" />
+                                    <input type="text" class="form-control fs-1 fw-bold" id="receiptArea"
+                                        autocomplete="off" />
                                 </td>
                             </tr>
                             <tr>
@@ -279,8 +302,31 @@
                                 </td>
                             </tr>
                             <tr>
+                                <td><strong>Sender Name</strong></td>
+                                <td>
+                                    <input type="text" class="form-control" id="receiptSenderName"
+                                        autocomplete="off" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sender Contact Number</strong></td>
+                                <td>
+                                    <input type="text" class="form-control" id="receiptSenderContact"
+                                        autocomplete="off" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Receiver Name | Number | Signature</strong></td>
+                                <td>
+                                    <input type="text" class="form-control" id="receiverDetails"
+                                        autocomplete="off" />
+                                </td>
+                            </tr>
+                            <tr>
                                 <td colspan="2">
-                                    <textarea class="form-control" id="receiptMessage"></textarea>
+                                    <center>
+                                        <textarea class="form-control" style="width: 50%" id="receiptMessage"></textarea>
+                                    </center>
                                 </td>
                             </tr>
                         </tbody>
@@ -419,6 +465,9 @@
                 $('#receiptRecipientNumber').val(order.customer_mobile_secondary || order
                     .customer_mobile_primary || '');
                 $('#receiptProducts').val(order.products || '');
+                $("#receiptSenderName").val(order.customer_name_primary || '');
+                $("#receiptSenderContact").val(order.customer_mobile_primary || '');
+                $("#receiverDetails").val('');
                 $('#receiptMessage').val(order.message || '');
 
                 $('#orderReceiptModal').modal('show');
@@ -451,6 +500,9 @@
                             $('#receiptRecipientNumber').val(order.customer_mobile_secondary ||
                                 order.customer_mobile_primary || '');
                             $('#receiptProducts').val(order.products || '');
+                            $("#receiptSenderName").val(order.customer_name_primary || '');
+                            $("#receiptSenderContact").val(order.customer_mobile_primary || '');
+                            $("#receiverDetails").val('');
                             $('#receiptMessage').val(order.message || '');
 
                             $('#orderReceiptModal').modal('show');
@@ -468,11 +520,11 @@
                 // Build print HTML with actual values
                 var html = `
                     <div class="text-center mb-3">
-                        <img src="assets/images/brand-logos/fnp-logo.jpeg" alt="Logo" style="height:80px;">
+                        <img src="assets/images/brand-logos/fnp-logo.jpeg" alt="Logo" style="height:150px;">
                     </div>
                     <table class="table table-bordered align-middle">
                         <tbody>
-                            <tr><td><strong>Area</strong></td><td>${$('#receiptArea').val()}</td></tr>
+                            <tr><td><strong>Area</strong></td><td class="fs-1 fw-bold">${$('#receiptArea').val()}</td></tr>
                             <tr><td><strong>Order No</strong></td><td>${$('#receiptOrderNo').text()}</td></tr>
                             <tr><td><strong>Date</strong></td><td>${$('#receiptDate').text()}</td></tr>
                             <tr><td><strong>Delivery Time Slot</strong></td><td>${$('#receiptDeliverySlot').val()}</td></tr>
@@ -480,7 +532,18 @@
                             <tr><td><strong>Recipient Address</strong></td><td>${$('#receiptRecipientAddress').val()}</td></tr>
                             <tr><td><strong>Recipient Number</strong></td><td>${$('#receiptRecipientNumber').val()}</td></tr>
                             <tr><td><strong>Products</strong></td><td>${$('#receiptProducts').val()}</td></tr>
-                            <tr><td colspan="2">${$('#receiptMessage').val()}</td></tr>
+                            <tr><td><strong>Sender Name</strong></td><td>${$('#receiptSenderName').val()}</td></tr>
+                            <tr><td><strong>Sender Contact Number</strong></td><td>${$('#receiptSenderContact').val()}</td></tr>
+                            <tr><td><strong>Receiver Name | Number | Signature</strong></td><td>${$('#receiverDetails').val()}</td></tr>
+                        </tbody>
+                    </table>
+                    <table style="width:50%;" class="table table-bordered align-middle">
+                        <tbody>
+                            <tr>
+                                <td colspan="2" class="text-center">
+                                    <strong>${$('#receiptMessage').val()}</strong>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 `;

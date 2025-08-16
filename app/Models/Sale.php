@@ -14,6 +14,7 @@ class Sale extends Model
         'online_sale',
         'credit_sale',
         'total_sale',
+        'overall_sale',
         'month',
         'created_at',
         'date'

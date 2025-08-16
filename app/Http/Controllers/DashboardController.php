@@ -129,7 +129,44 @@ class DashboardController extends Controller
                 })
                 ->sortByDesc('total_revenue')
                 ->take(5);
-        } else {
+        } 
+        elseif($request->filled('start_date') && $request->filled('end_date')){
+            // Filter KPIs for the selected date range
+            $startDate = Carbon::parse($request->input('start_date'));
+            $endDate = Carbon::parse($request->input('end_date'));
+
+            $totalSales = Sale::whereBetween('created_at', [$startDate, $endDate])
+                ->sum('total_sale');
+
+            $totalPurchase = Purchase::whereBetween('created_at', [$startDate, $endDate])
+                ->sum('amount');
+
+            $totalBouquets = Bouquet::whereBetween('created_at', [$startDate, $endDate])
+                ->count();
+
+            $totalPendingOrders = Order::where('order_status', 'pending')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->count();
+
+            // Calculate Top Vendors by Revenue (only if $vendor is present)
+            $topVendors = Order::whereNotNull('vendor') // Ensure vendor is present
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->get()
+                ->groupBy('vendor')
+                ->map(function ($orders, $vendor) {
+                    $a = Vendor::find($vendor);
+                    if (!$a) {
+                        return null; // Skip if vendor not found
+                    } 
+                    return [
+                        'vendor' => $a->first_name,
+                        'total_revenue' => $orders->sum('order_price'),
+                    ];
+                })
+                ->sortByDesc('total_revenue')
+                ->take(5);
+        }
+        else {
             // Default KPIs (all-time data)
             $totalSales = Sale::sum('total_sale');
             $totalPurchase = Purchase::sum('amount');

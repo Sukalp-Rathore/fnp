@@ -56,6 +56,7 @@ class OrderController extends Controller
 
     public function createOrder(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'order_type' => 'required|in:primary,secondary',
             'customer_name_primary' => 'required|string|max:255',

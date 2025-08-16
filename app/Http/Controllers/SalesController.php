@@ -11,7 +11,8 @@ class SalesController extends Controller
     public function sales()
     {
         $sales = Sale::get();
-        return view('sales', compact('sales'));
+        $total_sales = Sale::get()->sum('total_sale');
+        return view('sales', compact('sales', 'total_sales'));
     }
 
     public function enterSales(Request $request)
@@ -25,6 +26,7 @@ class SalesController extends Controller
         $credit_sales = (int)$request->creditsales;
         $online_sales = (int)$request->onlinesales;
         $total_sale = $cash_sales + $credit_sales + $online_sales;
+        $lastOverall = Sale::get()->sum('total_sale') + $total_sale;
         $currentMonth = now()->month;
 
         Sale::create([
@@ -33,6 +35,7 @@ class SalesController extends Controller
             'credit_sale' => $credit_sales,
             'total_sale' => $total_sale,
             'month' => $currentMonth,
+            'overall_sale' => (int)$lastOverall + $total_sale,
             'date' => $request->date
         ]);
         
